@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/header_height"
+            android:orientation="horizontal"
+            android:padding="@dimen/header_padding">
+
+            <ImageView
+                android:id="@+id/settings_arrow_back"
+                android:layout_width="@dimen/arrow_sizes"
+                android:layout_height="@dimen/arrow_sizes"
+                android:backgroundTint="@color/white"
+                android:padding="@dimen/padding_start_size"
+                android:src="@drawable/ic_arrow_back"
+                app:iconGravity="textStart"
+                app:iconTint="@color/dark_blue" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:paddingHorizontal="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="12dp"
+                android:text="@string/settings_header"
+                android:textColor="@color/dark_blue"
+                android:textSize="@dimen/header_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/settings_layout_size"
+            android:layout_marginTop="@dimen/layout_margin_top"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_weight="6"
+                android:paddingVertical="@dimen/text_padding_vertical"
+                android:paddingStart="@dimen/text_padding_start"
+                android:text="@string/dark_theme"
+                android:textColor="@color/black"
+                android:textSize="@dimen/menu_text_size" />
+
+            <Switch
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/margin_end_from_icon"
+                android:layout_weight="1"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/settings_layout_size"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_weight="6"
+                android:paddingVertical="@dimen/text_padding_vertical"
+                android:paddingStart="@dimen/text_padding_start"
+                android:text="@string/share_app"
+                android:textColor="@color/black"
+                android:textSize="@dimen/menu_text_size" />
+
+            <Button
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/margin_end_from_icon"
+                android:layout_weight="1"
+                android:backgroundTint="@color/white"
+                app:icon="@drawable/ic_share"
+                app:iconGravity="start"
+                app:iconTint="@color/icon_settings_color" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/settings_layout_size"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_weight="6"
+                android:paddingVertical="@dimen/text_padding_vertical"
+                android:paddingStart="@dimen/text_padding_start"
+                android:text="@string/write_to_support"
+                android:textColor="@color/black"
+                android:textSize="@dimen/menu_text_size" />
+
+            <Button
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/margin_end_from_icon"
+                android:layout_weight="1"
+                android:backgroundTint="@color/white"
+                app:icon="@drawable/ic_support"
+                app:iconTint="@color/icon_settings_color" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/settings_layout_size"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_weight="6"
+                android:paddingVertical="@dimen/text_padding_vertical"
+                android:paddingStart="@dimen/text_padding_start"
+                android:text="@string/agreement"
+                android:textColor="@color/black"
+                android:textSize="@dimen/menu_text_size" />
+
+            <Button
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginEnd="@dimen/margin_end_from_icon"
+                android:layout_weight="1"
+                android:backgroundTint="@color/white"
+                app:icon="@drawable/ic_arrow_forward"
+                app:iconTint="@color/icon_settings_color" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

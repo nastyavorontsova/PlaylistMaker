@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="main_button_size">22sp</dimen>
+    <dimen name="icon_padding_size">8dp</dimen>
+    <dimen name="corner_radius_size">16dp</dimen>
+    <dimen name="margin_bottom_size">16dp</dimen>
+    <dimen name="zero_height_size">0dp</dimen>
+    <dimen name="header_size">22sp</dimen>
+    <dimen name="menu_text_size">16sp</dimen>
+    <dimen name="settings_layout_size">61sp</dimen>
+    <dimen name="padding_start_size">16sp</dimen>
+    <dimen name="margin_end_from_icon">12dp</dimen>
+    <dimen name="text_padding_vertical">21dp</dimen>
+    <dimen name="text_padding_start">16dp</dimen>
+    <dimen name="header_height">56dp</dimen>
+    <dimen name="header_padding">4dp</dimen>
+    <dimen name="arrow_sizes">48dp</dimen>
+    <dimen name="layout_margin_top">24dp</dimen>
+</resources>
