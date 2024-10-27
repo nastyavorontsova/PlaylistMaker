@@ -3,7 +3,18 @@
     <style name="Base.Theme.PlaylistMaker1" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
+        <item name="colorPrimary">@color/light_blue</item>
+        <item name="colorOnPrimary">@color/icon_settings_color</item>
+        <item name="colorPrimaryVariant">@color/black</item>
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorOnSecondary">@color/dark_blue</item>
+        <item name="colorSecondaryVariant">@color/white</item>
 
-    <style name="Theme.PlaylistMaker1" parent="Base.Theme.PlaylistMaker1" />
+        <item name="searchIcon">@color/icon_settings_color</item>
+        <item name="searchViewStyle">@color/dark_grey</item>
+
+        <!-- цвет активного тоггла -->
+        <item name="colorControlActivated">@color/light_blue</item>
+
+    </style>
 </resources>
