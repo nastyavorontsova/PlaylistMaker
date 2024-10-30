@@ -7,6 +7,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -16,6 +17,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class SearchActivity : AppCompatActivity() {
+
+    companion object {
+        private const val SEARCH_TEXT_KEY = "search_text"
+    }
 
     private lateinit var inputEditText: EditText
     private var searchText: String = ""
@@ -33,8 +38,7 @@ class SearchActivity : AppCompatActivity() {
         val buttonSearchArrowBack: ImageView = findViewById(R.id.search_arrow_back)
 
         buttonSearchArrowBack.setOnClickListener {
-            val backSearchIntent = Intent(this, MainActivity::class.java)
-            startActivity(backSearchIntent)
+            finish()
         }
 
         inputEditText = findViewById(R.id.inputEditText)
@@ -64,7 +68,7 @@ class SearchActivity : AppCompatActivity() {
         inputEditText.addTextChangedListener(simpleTextWatcher)
 
         savedInstanceState?.let {
-            searchText = it.getString("search_text", "")
+            searchText = it.getString(SEARCH_TEXT_KEY, "")
             inputEditText.setText(searchText)
         }
     }
@@ -84,12 +88,12 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("search_text", searchText)
+        outState.putString(SEARCH_TEXT_KEY, searchText)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        searchText = savedInstanceState.getString("search_text", "")
+        searchText = savedInstanceState.getString(SEARCH_TEXT_KEY, "")
         inputEditText.setText(searchText)
     }
 }

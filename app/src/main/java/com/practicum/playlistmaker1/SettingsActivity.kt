@@ -18,8 +18,7 @@ class SettingsActivity : AppCompatActivity() {
         val buttonSettingsArrowBack: ImageView = findViewById(R.id.settings_arrow_back)
 
         buttonSettingsArrowBack.setOnClickListener {
-            val backSettingsIntent = Intent(this, MainActivity::class.java)
-            startActivity(backSettingsIntent)
+            finish()
         }
 
         val shareButton: LinearLayout = findViewById(R.id.share_button)

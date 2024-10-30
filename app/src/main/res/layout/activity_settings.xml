@@ -8,6 +8,8 @@
 
     <LinearLayout
         style="@style/SecondaryLayoutStyle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp">
@@ -49,6 +51,10 @@
 
             <TextView
                 style="@style/TextViewSettingsStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:layout_gravity="start"
                 android:text="@string/dark_theme" />
 
             <Switch
@@ -69,11 +75,12 @@
 
             <TextView
                 style="@style/TextViewSettingsStyle"
-                android:text="@string/share_app" />
+                android:text="@string/share_app"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:drawableEnd="@drawable/ic_share"/>
 
-            <ImageView
-                style="@style/SettingsButtonStyle"
-                android:src="@drawable/ic_share" />
         </LinearLayout>
 
         <LinearLayout
@@ -85,11 +92,12 @@
 
             <TextView
                 style="@style/TextViewSettingsStyle"
-                android:text="@string/write_to_support" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="@string/write_to_support"
+                android:drawableEnd="@drawable/ic_support"/>
 
-            <ImageView
-                style="@style/SettingsButtonStyle"
-                android:src="@drawable/ic_support" />
         </LinearLayout>
 
         <LinearLayout
@@ -101,11 +109,12 @@
 
             <TextView
                 style="@style/TextViewSettingsStyle"
-                android:text="@string/agreement" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="@string/agreement"
+                android:drawableEnd="@drawable/ic_arrow_forward"/>
 
-            <ImageView
-                style="@style/SettingsButtonStyle"
-                android:src="@drawable/ic_arrow_forward" />
         </LinearLayout>
 
     </LinearLayout>

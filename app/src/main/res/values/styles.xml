@@ -2,10 +2,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="ButtonMainStyle" parent="@style/Widget.MaterialComponents.Button.UnelevatedButton">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/zero_height_size</item>
-        <item name="android:layout_marginBottom">@dimen/margin_bottom_size</item>
-        <item name="android:layout_weight">1</item>
         <item name="android:backgroundTint">@color/white</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/dark_blue</item>
@@ -19,38 +15,20 @@
     </style>
 
     <style name="TextViewSettingsStyle">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">start</item>
-        <item name="android:layout_weight">6</item>
         <item name="android:paddingVertical">@dimen/text_padding_vertical</item>
-        <item name="android:paddingStart">@dimen/text_padding_start</item>
+        <item name="android:paddingHorizontal">@dimen/text_padding_start</item>
         <item name="android:textColor">?attr/colorPrimaryVariant</item>
         <item name="android:textSize">@dimen/menu_text_size</item>
         <item name="android:fontFamily">@font/ys_display_regular</item>
     </style>
 
-    <style name="SettingsButtonStyle">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:padding">@dimen/text_padding_start</item>
-        <item name="android:layout_centerInParent">true</item>
-        <item name="android:tint">?attr/colorOnPrimary</item>
-    </style>
-
     <style name="MainLayoutStyle">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
         <item name="android:background">?attr/colorPrimary</item>
         <item name="android:orientation">vertical</item>
         <item name="android:padding">@dimen/padding_start_size</item>
     </style>
 
     <style name="SecondaryLayoutStyle">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
         <item name="android:background">?attr/colorSecondary</item>
         <item name="android:orientation">vertical</item>
     </style>

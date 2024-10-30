@@ -8,6 +8,8 @@
 
     <LinearLayout
         style="@style/MainLayoutStyle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp">
@@ -36,18 +38,30 @@
             android:orientation="vertical">
 
             <Button
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/zero_height_size"
+                android:layout_marginBottom="@dimen/margin_bottom_size"
+                android:layout_weight="1"
                 android:id="@+id/search_main"
                 style="@style/ButtonMainStyle"
                 android:text="@string/search"
                 app:icon="@drawable/ic_search" />
 
             <Button
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/zero_height_size"
+                android:layout_marginBottom="@dimen/margin_bottom_size"
+                android:layout_weight="1"
                 android:id="@+id/media_main"
                 style="@style/ButtonMainStyle"
                 android:text="@string/media"
                 app:icon="@drawable/ic_mediateka" />
 
             <Button
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/zero_height_size"
+                android:layout_marginBottom="@dimen/margin_bottom_size"
+                android:layout_weight="1"
                 android:id="@+id/settings_main"
                 style="@style/ButtonMainStyle"
                 android:text="@string/settings"
