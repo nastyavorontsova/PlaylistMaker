@@ -7,11 +7,10 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        style="@style/MainLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background_blue"
-        android:orientation="vertical"
-        android:padding="@dimen/padding_start_size"
+        tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp">
 
@@ -25,6 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="start"
+                android:fontFamily="@font/ys_display_medium"
                 android:text="@string/main_header"
                 android:textColor="@color/white"
                 android:textSize="@dimen/header_size" />
@@ -38,55 +38,34 @@
             android:orientation="vertical">
 
             <Button
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/zero_height_size"
+                android:layout_marginBottom="@dimen/margin_bottom_size"
+                android:layout_weight="1"
                 android:id="@+id/search_main"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/zero_height_size"
-                android:layout_marginBottom="@dimen/margin_bottom_size"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
+                style="@style/ButtonMainStyle"
                 android:text="@string/search"
-                android:textAllCaps="false"
-                android:textColor="@color/dark_blue"
-                android:textSize="@dimen/main_button_size"
-                app:cornerRadius="@dimen/corner_radius_size"
-                app:icon="@drawable/ic_search"
-                app:iconGravity="textStart"
-                app:iconPadding="@dimen/icon_padding_size"
-                app:iconTint="@color/dark_blue" />
+                app:icon="@drawable/ic_search" />
 
             <Button
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/zero_height_size"
+                android:layout_marginBottom="@dimen/margin_bottom_size"
+                android:layout_weight="1"
                 android:id="@+id/media_main"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/zero_height_size"
-                android:layout_marginBottom="@dimen/margin_bottom_size"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
+                style="@style/ButtonMainStyle"
                 android:text="@string/media"
-                android:textAllCaps="false"
-                android:textColor="@color/dark_blue"
-                android:textSize="@dimen/main_button_size"
-                app:cornerRadius="@dimen/corner_radius_size"
-                app:icon="@drawable/ic_mediateka"
-                app:iconGravity="textStart"
-                app:iconPadding="@dimen/icon_padding_size"
-                app:iconTint="@color/dark_blue" />
+                app:icon="@drawable/ic_mediateka" />
 
             <Button
-                android:id="@+id/settings_main"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/zero_height_size"
                 android:layout_marginBottom="@dimen/margin_bottom_size"
                 android:layout_weight="1"
-                android:backgroundTint="@color/white"
+                android:id="@+id/settings_main"
+                style="@style/ButtonMainStyle"
                 android:text="@string/settings"
-                android:textAllCaps="false"
-                android:textColor="@color/dark_blue"
-                android:textSize="@dimen/main_button_size"
-                app:cornerRadius="@dimen/corner_radius_size"
-                app:icon="@drawable/ic_settings"
-                app:iconGravity="textStart"
-                app:iconPadding="@dimen/icon_padding_size"
-                app:iconTint="@color/dark_blue" />
+                app:icon="@drawable/ic_settings" />
         </LinearLayout>
     </LinearLayout>
 

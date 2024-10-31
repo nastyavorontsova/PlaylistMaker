@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="ButtonMainStyle" parent="@style/Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/dark_blue</item>
+        <item name="android:textSize">@dimen/main_button_size</item>
+        <item name="cornerRadius">@dimen/corner_radius_size</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">@dimen/icon_padding_size</item>
+        <item name="iconTint">@color/dark_blue</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <style name="TextViewSettingsStyle">
+        <item name="android:paddingVertical">@dimen/text_padding_vertical</item>
+        <item name="android:paddingHorizontal">@dimen/text_padding_start</item>
+        <item name="android:textColor">?attr/colorPrimaryVariant</item>
+        <item name="android:textSize">@dimen/menu_text_size</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+    </style>
+
+    <style name="MainLayoutStyle">
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">@dimen/padding_start_size</item>
+    </style>
+
+    <style name="SecondaryLayoutStyle">
+        <item name="android:background">?attr/colorSecondary</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+</resources>

@@ -7,10 +7,10 @@
     android:orientation="vertical">
 
     <LinearLayout
+        style="@style/SecondaryLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
-        android:orientation="vertical"
+        tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp">
 
@@ -24,21 +24,22 @@
                 android:id="@+id/settings_arrow_back"
                 android:layout_width="@dimen/arrow_sizes"
                 android:layout_height="@dimen/arrow_sizes"
-                android:backgroundTint="@color/white"
+                android:background="?attr/selectableItemBackground"
                 android:padding="@dimen/padding_start_size"
                 android:src="@drawable/ic_arrow_back"
-                app:iconGravity="textStart"
-                app:iconTint="@color/dark_blue" />
+                android:tint="?attr/colorPrimaryVariant"
+                tools:ignore="UseAppTint" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:paddingHorizontal="12dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="12dp"
+                android:layout_gravity="center"
+                android:fontFamily="@font/ys_display_medium"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="16dp"
                 android:text="@string/settings_header"
-                android:textColor="@color/dark_blue"
+                android:textColor="?attr/colorOnSecondary"
                 android:textSize="@dimen/header_size" />
         </LinearLayout>
 
@@ -49,15 +50,12 @@
             android:orientation="horizontal">
 
             <TextView
+                style="@style/TextViewSettingsStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
                 android:layout_weight="6"
-                android:paddingVertical="@dimen/text_padding_vertical"
-                android:paddingStart="@dimen/text_padding_start"
-                android:text="@string/dark_theme"
-                android:textColor="@color/black"
-                android:textSize="@dimen/menu_text_size" />
+                android:layout_gravity="start"
+                android:text="@string/dark_theme" />
 
             <Switch
                 android:layout_width="0dp"
@@ -69,88 +67,54 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/share_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/settings_layout_size"
+            android:background="?attr/selectableItemBackground"
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:layout_weight="6"
-                android:paddingVertical="@dimen/text_padding_vertical"
-                android:paddingStart="@dimen/text_padding_start"
+                style="@style/TextViewSettingsStyle"
                 android:text="@string/share_app"
-                android:textColor="@color/black"
-                android:textSize="@dimen/menu_text_size" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:drawableEnd="@drawable/ic_share"/>
 
-            <Button
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_marginEnd="@dimen/margin_end_from_icon"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
-                app:icon="@drawable/ic_share"
-                app:iconGravity="start"
-                app:iconTint="@color/icon_settings_color" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/support_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/settings_layout_size"
+            android:background="?attr/selectableItemBackground"
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="0dp"
+                style="@style/TextViewSettingsStyle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_weight="6"
-                android:paddingVertical="@dimen/text_padding_vertical"
-                android:paddingStart="@dimen/text_padding_start"
                 android:text="@string/write_to_support"
-                android:textColor="@color/black"
-                android:textSize="@dimen/menu_text_size" />
+                android:drawableEnd="@drawable/ic_support"/>
 
-            <Button
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_marginEnd="@dimen/margin_end_from_icon"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
-                app:icon="@drawable/ic_support"
-                app:iconTint="@color/icon_settings_color" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/privacy_agreement_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/settings_layout_size"
+            android:background="?attr/selectableItemBackground"
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="0dp"
+                style="@style/TextViewSettingsStyle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_weight="6"
-                android:paddingVertical="@dimen/text_padding_vertical"
-                android:paddingStart="@dimen/text_padding_start"
                 android:text="@string/agreement"
-                android:textColor="@color/black"
-                android:textSize="@dimen/menu_text_size" />
+                android:drawableEnd="@drawable/ic_arrow_forward"/>
 
-            <Button
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_marginEnd="@dimen/margin_end_from_icon"
-                android:layout_weight="1"
-                android:backgroundTint="@color/white"
-                app:icon="@drawable/ic_arrow_forward"
-                app:iconTint="@color/icon_settings_color" />
         </LinearLayout>
 
     </LinearLayout>
