@@ -113,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:text="@string/agreement"
-                android:drawableEnd="@drawable/ic_arrow_forward"/>
+                android:drawableEnd="@drawable/ic_arrow_forward" />
 
         </LinearLayout>
 

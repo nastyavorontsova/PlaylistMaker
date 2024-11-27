@@ -9,29 +9,33 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 
-class TrackViewHolder (itemView: View) : RecyclerView.ViewHolder(itemView){
-    private val trackNameTextView: TextView = itemView.findViewById(R.id.trackNameTextView)
-    private val artistNameTextView: TextView = itemView.findViewById(R.id.artistNameTextView)
-    private val trackTimeTextView: TextView = itemView.findViewById(R.id.trackTimeTextView)
-    private val artworkImageView: ImageView = itemView.findViewById(R.id.artworkImageView)
+class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private var trackNameTextView: TextView = itemView.findViewById(R.id.trackNameTextView)
+    private var artistNameTextView: TextView = itemView.findViewById(R.id.artistNameTextView)
+    private var trackTimeTextView: TextView = itemView.findViewById(R.id.trackTimeTextView)
+    private var artworkImageView: ImageView = itemView.findViewById(R.id.artworkImageView)
 
     fun bind(track: Track) {
         trackNameTextView.text = track.trackName
         artistNameTextView.text = track.artistName
-        trackTimeTextView.text = track.trackTime
+        trackTimeTextView.text = track.getFormattedDuration()
+
+        val cornerRadius = itemView.resources.getDimensionPixelSize(R.dimen.button_radius)
 
         Glide.with(itemView)
             .load(track.artworkUrl100)
-            .placeholder(R.drawable.placeholder)
-            .error(R.drawable.placeholder)
-            .fallback(R.drawable.placeholder)
+            .placeholder(R.drawable.placeholder_cover)
+            .error(R.drawable.placeholder_cover)
+            .fallback(R.drawable.placeholder_cover)
             .fitCenter()
-            .transform(RoundedCorners(4))
+            .transform(RoundedCorners(cornerRadius))
             .into(artworkImageView)
     }
+
     companion object {
         fun create(parent: ViewGroup): TrackViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_track, parent, false)
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.item_track, parent, false)
             return TrackViewHolder(view)
         }
     }
