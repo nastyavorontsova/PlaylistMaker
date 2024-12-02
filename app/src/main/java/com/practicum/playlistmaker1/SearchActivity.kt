@@ -3,8 +3,11 @@ package com.practicum.playlistmaker1
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -77,8 +80,12 @@ class SearchActivity : AppCompatActivity() {
         clearButton.setOnClickListener {
             inputEditText.setText("")
             hideKeyboard(it)
+
             trackList.clear()
             trackAdapter.notifyDataSetChanged()
+
+            emptyStateLayout.visibility = View.GONE
+            errorStateLayout.visibility = View.GONE
         }
 
         val simpleTextWatcher = object : TextWatcher {
@@ -130,14 +137,7 @@ class SearchActivity : AppCompatActivity() {
         emptyStateLayout.visibility = View.GONE
         errorStateLayout.visibility = View.GONE
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://itunes.apple.com")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val apiService = retrofit.create(ApiService::class.java)
-        val call = apiService.search(term)
-
+        val call = RetrofitClient.apiService.search(term)
         call.enqueue(object : Callback<SongResponse> {
             override fun onResponse(call: Call<SongResponse>, response: Response<SongResponse>) {
                 if (response.isSuccessful && response.body() != null) {
@@ -145,10 +145,8 @@ class SearchActivity : AppCompatActivity() {
                     if (songResponse.resultCount > 0) {
                         trackList.clear()
                         trackList.addAll(songResponse.results)
-                        trackAdapter.notifyDataSetChanged()
                         trackRecyclerView.visibility = View.VISIBLE
-                        emptyStateLayout.visibility = View.GONE
-                        errorStateLayout.visibility = View.GONE
+                        trackAdapter.notifyDataSetChanged()
                     } else {
                         showEmptyState()
                     }
@@ -164,15 +162,15 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showEmptyState() {
-        emptyStateLayout.visibility = View.VISIBLE
         trackRecyclerView.visibility = View.GONE
+        emptyStateLayout.visibility = View.VISIBLE
         errorStateLayout.visibility = View.GONE
     }
 
     private fun showErrorState() {
-        errorStateLayout.visibility = View.VISIBLE
         trackRecyclerView.visibility = View.GONE
         emptyStateLayout.visibility = View.GONE
+        errorStateLayout.visibility = View.VISIBLE
     }
 
     private fun hideKeyboard(view: View) {
