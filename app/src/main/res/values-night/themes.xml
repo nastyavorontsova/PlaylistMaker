@@ -15,6 +15,7 @@
 
         <!-- цвет активного тоггла -->
         <item name="colorControlActivated">@color/light_blue</item>
+        <item name="trackColor">@color/dark_track</item>
 
     </style>
 </resources>

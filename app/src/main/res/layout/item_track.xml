@@ -65,7 +65,7 @@
                     android:layout_width="@dimen/ic_size"
                     android:layout_height="@dimen/ic_size"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic" />
+                    android:src="@drawable/ic_dot" />
 
                 <TextView
                     android:id="@+id/trackTimeTextView"
