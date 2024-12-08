@@ -57,13 +57,15 @@
                 android:layout_gravity="start"
                 android:text="@string/dark_theme" />
 
-            <Switch
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/themeSwitcher"
                 android:layout_width="0dp"
+                android:layout_gravity="start"
                 android:layout_height="match_parent"
-                android:layout_gravity="center"
                 android:layout_marginEnd="@dimen/margin_end_from_icon"
                 android:layout_weight="1"
-                tools:ignore="UseSwitchCompatOrMaterialXml" />
+                app:thumbTint="?attr/colorControlActivated"
+                app:trackTint="?attr/trackColor"/>
         </LinearLayout>
 
         <LinearLayout

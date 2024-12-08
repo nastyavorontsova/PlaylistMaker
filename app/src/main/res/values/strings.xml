@@ -19,5 +19,7 @@
     <string name="empty_message">Ничего не нашлось</string>
     <string name="error_state_message">Проблемы со связью\n\n Загрузка не удалась. Проверьте подключение к интернету</string>
     <string name="renew_message">Обновить</string>
+    <string name="search_history">Вы искали</string>
+    <string name="clear_history">Очистить историю</string>
 
 </resources>

@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -48,6 +49,11 @@ class SearchActivity : AppCompatActivity() {
 
     private var trackList: MutableList<Track> = mutableListOf()
 
+    private lateinit var searchHistory: SearchHistory
+    private lateinit var historyRecyclerView: RecyclerView
+    private lateinit var historyContainer: ViewGroup
+    private lateinit var clearHistoryButton: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -57,6 +63,9 @@ class SearchActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        initViews()
+        initHistory()
 
         val buttonSearchArrowBack: ImageView = findViewById(R.id.search_arrow_back)
 
@@ -72,10 +81,30 @@ class SearchActivity : AppCompatActivity() {
         retryButton = findViewById(R.id.retryButton)
 
         trackRecyclerView.layoutManager = LinearLayoutManager(this)
-        trackAdapter = TrackAdapter(trackList)
+        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        searchHistory = SearchHistory(getSharedPreferences("app_preferences", MODE_PRIVATE))
+
+        trackAdapter = TrackAdapter(trackList) { track ->
+            searchHistory.addTrack(track) // Добавляем трек в историю поиска
+            // коммент на будущее
+            // здесь можно будет открыть экран плеера:
+            // val intent = Intent(this, PlayerActivity::class.java)
+            // intent.putExtra("TRACK_ID", track.trackId)
+            // startActivity(intent)
+        }
+
+
         trackRecyclerView.adapter = trackAdapter
 
+        historyRecyclerView = findViewById(R.id.historyRecyclerView)
+        clearHistoryButton = findViewById(R.id.clearHistoryButton)
+        historyContainer = findViewById(R.id.historyContainer)
+
         val clearButton: ImageView = findViewById(R.id.clearIcon)
+
+
+
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
@@ -99,7 +128,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                // empty
+                updateHistoryVisibility(inputEditText.hasFocus())
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
@@ -129,6 +158,11 @@ class SearchActivity : AppCompatActivity() {
         savedInstanceState?.let {
             searchText = it.getString(SEARCH_TEXT_KEY, "")
             inputEditText.setText(searchText)
+        }
+
+        clearHistoryButton.setOnClickListener {
+            searchHistory.clearHistory()
+            updateHistoryVisibility(inputEditText.hasFocus())
         }
     }
 
@@ -185,6 +219,46 @@ class SearchActivity : AppCompatActivity() {
             View.VISIBLE
         }
     }
+
+    private fun updateHistoryVisibility(hasFocus: Boolean) {
+        val history = searchHistory.getHistory()
+        historyContainer.visibility = if (hasFocus && history.isNotEmpty() && inputEditText.text.isEmpty()) {
+
+            historyRecyclerView.adapter = TrackAdapter(history) { track ->
+                searchHistory.addTrack(track)
+            }
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+    }
+
+    private fun initViews() {
+        historyRecyclerView = findViewById(R.id.historyRecyclerView)
+        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+        searchHistory = SearchHistory(getSharedPreferences("app_preferences", MODE_PRIVATE))
+        inputEditText = findViewById(R.id.inputEditText)
+        historyContainer = findViewById(R.id.historyContainer)
+
+        inputEditText.setOnFocusChangeListener { _, hasFocus -> onFocusChange(hasFocus) }
+    }
+
+    private fun onFocusChange(hasFocus: Boolean) {
+        updateHistoryVisibility(hasFocus)
+    }
+
+    private fun initHistory() {
+        val history = searchHistory.getHistory()
+        if (history.isNotEmpty()) {
+            historyRecyclerView.adapter = TrackAdapter(history) { track ->
+                searchHistory.addTrack(track)
+                // коммент на будущее
+                // здесь можно добавить код для открытия экрана плеера
+            }
+        }
+        updateHistoryVisibility(inputEditText.hasFocus())
+    }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
