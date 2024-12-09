@@ -3,20 +3,32 @@ package com.practicum.playlistmaker1
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchActivity : AppCompatActivity() {
 
@@ -30,6 +42,18 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var trackRecyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
 
+    private lateinit var emptyStateLayout: FrameLayout
+    private lateinit var errorStateLayout: FrameLayout
+
+    private lateinit var retryButton: Button
+
+    private var trackList: MutableList<Track> = mutableListOf()
+
+    private lateinit var searchHistory: SearchHistory
+    private lateinit var historyRecyclerView: RecyclerView
+    private lateinit var historyContainer: ViewGroup
+    private lateinit var clearHistoryButton: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -40,6 +64,9 @@ class SearchActivity : AppCompatActivity() {
             insets
         }
 
+        initViews()
+        initHistory()
+
         val buttonSearchArrowBack: ImageView = findViewById(R.id.search_arrow_back)
 
         buttonSearchArrowBack.setOnClickListener {
@@ -47,13 +74,47 @@ class SearchActivity : AppCompatActivity() {
         }
 
         inputEditText = findViewById(R.id.inputEditText)
+        trackRecyclerView = findViewById(R.id.trackRecyclerView)
+        emptyStateLayout = findViewById(R.id.emptyStateLayout)
+        errorStateLayout = findViewById(R.id.errorStateLayout)
+
+        retryButton = findViewById(R.id.retryButton)
+
+        trackRecyclerView.layoutManager = LinearLayoutManager(this)
+        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        searchHistory = SearchHistory(getSharedPreferences("app_preferences", MODE_PRIVATE))
+
+        trackAdapter = TrackAdapter(trackList) { track ->
+            searchHistory.addTrack(track) // Добавляем трек в историю поиска
+            // коммент на будущее
+            // здесь можно будет открыть экран плеера:
+            // val intent = Intent(this, PlayerActivity::class.java)
+            // intent.putExtra("TRACK_ID", track.trackId)
+            // startActivity(intent)
+        }
+
+
+        trackRecyclerView.adapter = trackAdapter
+
+        historyRecyclerView = findViewById(R.id.historyRecyclerView)
+        clearHistoryButton = findViewById(R.id.clearHistoryButton)
+        historyContainer = findViewById(R.id.historyContainer)
 
         val clearButton: ImageView = findViewById(R.id.clearIcon)
 
+
+
+
         clearButton.setOnClickListener {
             inputEditText.setText("")
-
             hideKeyboard(it)
+
+            trackList.clear()
+            trackAdapter.notifyDataSetChanged()
+
+            emptyStateLayout.visibility = View.GONE
+            errorStateLayout.visibility = View.GONE
         }
 
         val simpleTextWatcher = object : TextWatcher {
@@ -67,29 +128,83 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                // empty
+                updateHistoryVisibility(inputEditText.hasFocus())
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
+
+        inputEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                performSearch(inputEditText.text.toString())
+                true
+            } else {
+                false
+            }
+        }
+
+        inputEditText.setOnClickListener {
+            inputEditText.text.clear()
+            trackList.clear()
+            trackAdapter.notifyDataSetChanged()
+            trackRecyclerView.visibility = View.GONE
+            emptyStateLayout.visibility = View.GONE
+            errorStateLayout.visibility = View.GONE
+        }
+
+        retryButton.setOnClickListener {
+            performSearch(inputEditText.text.toString())
+        }
 
         savedInstanceState?.let {
             searchText = it.getString(SEARCH_TEXT_KEY, "")
             inputEditText.setText(searchText)
         }
 
-        trackRecyclerView = findViewById(R.id.trackRecyclerView)
-        trackRecyclerView.layoutManager = LinearLayoutManager(this)
+        clearHistoryButton.setOnClickListener {
+            searchHistory.clearHistory()
+            updateHistoryVisibility(inputEditText.hasFocus())
+        }
+    }
 
-        val tracks = arrayListOf(
-            Track("Smells Like Teen Spirit", "Nirvana", "5:01", "https://is5-ssl.mzstatic.com/image/thumb/Music115/v4/7b/58/c2/7b58c21a-2b51-2bb2-e59a-9bb9b96ad8c3/00602567924166.rgb.jpg/100x100bb.jpg"),
-            Track("Billie Jean", "Michael Jackson", "4:35", "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/3d/9d/38/3d9d3811-71f0-3a0e-1ada-3004e56ff852/827969428726.jpg/100x100bb.jpg"),
-            Track("Stayin' Alive", "Bee Gees", "4:10", "https://is4-ssl.mzstatic.com/image/thumb/Music115/v4/1f/80/1f/1f801fc1-8c0f-ea3e-d3e5-387c6619619e/16UMGIM86640.rgb.jpg/100x100bb.jpg"),
-            Track("Whole Lotta Love", "Led Zeppelin", "5:33", "https://is2-ssl.mzstatic.com/image/thumb/Music62/v4/7e/17/e3/7e17e33f-2efa-2a36-e916-7f808576cf6b/mzm.fyigqcbs.jpg/100x100bb.jpg"),
-            Track("Sweet Child O'Mine", "Guns N' Roses", "5:03", "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/a0/4d/c4/a04dc484-03cc-02aa-fa82-5334fcb4bc16/18UMGIM24878.rgb.jpg/100x100bb.jpg"),
-        )
+    private fun performSearch(term: String) {
 
-        trackAdapter = TrackAdapter(tracks)
-        trackRecyclerView.adapter = trackAdapter
+        emptyStateLayout.visibility = View.GONE
+        errorStateLayout.visibility = View.GONE
+
+        val call = RetrofitClient.apiService.search(term)
+        call.enqueue(object : Callback<SongResponse> {
+            override fun onResponse(call: Call<SongResponse>, response: Response<SongResponse>) {
+                if (response.isSuccessful && response.body() != null) {
+                    val songResponse = response.body()!!
+                    if (songResponse.resultCount > 0) {
+                        trackList.clear()
+                        trackList.addAll(songResponse.results)
+                        trackRecyclerView.visibility = View.VISIBLE
+                        trackAdapter.notifyDataSetChanged()
+                    } else {
+                        showEmptyState()
+                    }
+                } else {
+                    showErrorState()
+                }
+            }
+
+            override fun onFailure(call: Call<SongResponse>, t: Throwable) {
+                showErrorState()
+            }
+        })
+    }
+
+    private fun showEmptyState() {
+        trackRecyclerView.visibility = View.GONE
+        emptyStateLayout.visibility = View.VISIBLE
+        errorStateLayout.visibility = View.GONE
+    }
+
+    private fun showErrorState() {
+        trackRecyclerView.visibility = View.GONE
+        emptyStateLayout.visibility = View.GONE
+        errorStateLayout.visibility = View.VISIBLE
     }
 
     private fun hideKeyboard(view: View) {
@@ -104,6 +219,46 @@ class SearchActivity : AppCompatActivity() {
             View.VISIBLE
         }
     }
+
+    private fun updateHistoryVisibility(hasFocus: Boolean) {
+        val history = searchHistory.getHistory()
+        historyContainer.visibility = if (hasFocus && history.isNotEmpty() && inputEditText.text.isEmpty()) {
+
+            historyRecyclerView.adapter = TrackAdapter(history) { track ->
+                searchHistory.addTrack(track)
+            }
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+    }
+
+    private fun initViews() {
+        historyRecyclerView = findViewById(R.id.historyRecyclerView)
+        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+        searchHistory = SearchHistory(getSharedPreferences("app_preferences", MODE_PRIVATE))
+        inputEditText = findViewById(R.id.inputEditText)
+        historyContainer = findViewById(R.id.historyContainer)
+
+        inputEditText.setOnFocusChangeListener { _, hasFocus -> onFocusChange(hasFocus) }
+    }
+
+    private fun onFocusChange(hasFocus: Boolean) {
+        updateHistoryVisibility(hasFocus)
+    }
+
+    private fun initHistory() {
+        val history = searchHistory.getHistory()
+        if (history.isNotEmpty()) {
+            historyRecyclerView.adapter = TrackAdapter(history) { track ->
+                searchHistory.addTrack(track)
+                // коммент на будущее
+                // здесь можно добавить код для открытия экрана плеера
+            }
+        }
+        updateHistoryVisibility(inputEditText.hasFocus())
+    }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
