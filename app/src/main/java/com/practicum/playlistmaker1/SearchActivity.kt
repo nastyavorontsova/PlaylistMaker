@@ -86,9 +86,10 @@ class SearchActivity : AppCompatActivity() {
         searchHistory = SearchHistory(getSharedPreferences("app_preferences", MODE_PRIVATE))
 
         trackAdapter = TrackAdapter(trackList) { track ->
-            searchHistory.addTrack(track) // Добавляем трек в историю поиска
-            // коммент на будущее
-            // здесь можно будет открыть экран плеера:
+            searchHistory.addTrack(track)
+            val intent = Intent(this, AudioPlayerActivity::class.java)
+            intent.putExtra("TRACK_DATA", track)
+            startActivity(intent)
             // val intent = Intent(this, PlayerActivity::class.java)
             // intent.putExtra("TRACK_ID", track.trackId)
             // startActivity(intent)
@@ -226,6 +227,10 @@ class SearchActivity : AppCompatActivity() {
 
             historyRecyclerView.adapter = TrackAdapter(history) { track ->
                 searchHistory.addTrack(track)
+
+                val intent = Intent(this, AudioPlayerActivity::class.java)
+                intent.putExtra("TRACK_DATA", track)
+                startActivity(intent)
             }
             View.VISIBLE
         } else {
@@ -252,8 +257,10 @@ class SearchActivity : AppCompatActivity() {
         if (history.isNotEmpty()) {
             historyRecyclerView.adapter = TrackAdapter(history) { track ->
                 searchHistory.addTrack(track)
-                // коммент на будущее
-                // здесь можно добавить код для открытия экрана плеера
+
+                val intent = Intent(this, AudioPlayerActivity::class.java)
+                intent.putExtra("TRACK_DATA", track)
+                startActivity(intent)
             }
         }
         updateHistoryVisibility(inputEditText.hasFocus())
