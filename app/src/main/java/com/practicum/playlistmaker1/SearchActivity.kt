@@ -54,6 +54,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var historyContainer: ViewGroup
     private lateinit var clearHistoryButton: Button
 
+    private lateinit var historyAdapter: TrackAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -90,9 +92,6 @@ class SearchActivity : AppCompatActivity() {
             val intent = Intent(this, AudioPlayerActivity::class.java)
             intent.putExtra("TRACK_DATA", track)
             startActivity(intent)
-            // val intent = Intent(this, PlayerActivity::class.java)
-            // intent.putExtra("TRACK_ID", track.trackId)
-            // startActivity(intent)
         }
 
 
@@ -104,9 +103,6 @@ class SearchActivity : AppCompatActivity() {
 
         val clearButton: ImageView = findViewById(R.id.clearIcon)
 
-
-
-
         clearButton.setOnClickListener {
             inputEditText.setText("")
             hideKeyboard(it)
@@ -116,6 +112,8 @@ class SearchActivity : AppCompatActivity() {
 
             emptyStateLayout.visibility = View.GONE
             errorStateLayout.visibility = View.GONE
+
+            updateHistoryVisibility(inputEditText.hasFocus())
         }
 
         val simpleTextWatcher = object : TextWatcher {
@@ -125,11 +123,11 @@ class SearchActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 searchText = s.toString()
+                handleTextChange(s.toString())
                 clearButton.visibility = clearButtonVisibility(s)
             }
 
             override fun afterTextChanged(s: Editable?) {
-                updateHistoryVisibility(inputEditText.hasFocus())
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
@@ -141,15 +139,6 @@ class SearchActivity : AppCompatActivity() {
             } else {
                 false
             }
-        }
-
-        inputEditText.setOnClickListener {
-            inputEditText.text.clear()
-            trackList.clear()
-            trackAdapter.notifyDataSetChanged()
-            trackRecyclerView.visibility = View.GONE
-            emptyStateLayout.visibility = View.GONE
-            errorStateLayout.visibility = View.GONE
         }
 
         retryButton.setOnClickListener {
@@ -200,12 +189,14 @@ class SearchActivity : AppCompatActivity() {
         trackRecyclerView.visibility = View.GONE
         emptyStateLayout.visibility = View.VISIBLE
         errorStateLayout.visibility = View.GONE
+        historyContainer.visibility = View.GONE
     }
 
     private fun showErrorState() {
         trackRecyclerView.visibility = View.GONE
         emptyStateLayout.visibility = View.GONE
         errorStateLayout.visibility = View.VISIBLE
+        historyContainer.visibility = View.GONE
     }
 
     private fun hideKeyboard(view: View) {
@@ -223,18 +214,12 @@ class SearchActivity : AppCompatActivity() {
 
     private fun updateHistoryVisibility(hasFocus: Boolean) {
         val history = searchHistory.getHistory()
-        historyContainer.visibility = if (hasFocus && history.isNotEmpty() && inputEditText.text.isEmpty()) {
 
-            historyRecyclerView.adapter = TrackAdapter(history) { track ->
-                searchHistory.addTrack(track)
-
-                val intent = Intent(this, AudioPlayerActivity::class.java)
-                intent.putExtra("TRACK_DATA", track)
-                startActivity(intent)
-            }
-            View.VISIBLE
+        if (hasFocus && history.isNotEmpty() && inputEditText.text.isEmpty()) {
+            historyAdapter.updateData(history)
+            historyContainer.visibility = View.VISIBLE
         } else {
-            View.GONE
+            historyContainer.visibility = View.GONE
         }
     }
 
@@ -245,25 +230,62 @@ class SearchActivity : AppCompatActivity() {
         inputEditText = findViewById(R.id.inputEditText)
         historyContainer = findViewById(R.id.historyContainer)
 
-        inputEditText.setOnFocusChangeListener { _, hasFocus -> onFocusChange(hasFocus) }
-    }
+        inputEditText.setOnClickListener {
+            if (inputEditText.text.isEmpty()) {
+                showSearchHistoryIfNotEmpty()
+            } else {
+                historyContainer.visibility = View.GONE
+            }
+        }
 
-    private fun onFocusChange(hasFocus: Boolean) {
-        updateHistoryVisibility(hasFocus)
+        inputEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus && inputEditText.text.isEmpty()) {
+                showSearchHistoryIfNotEmpty()
+            } else {
+                historyContainer.visibility = View.GONE
+            }
+        }
     }
 
     private fun initHistory() {
         val history = searchHistory.getHistory()
-        if (history.isNotEmpty()) {
-            historyRecyclerView.adapter = TrackAdapter(history) { track ->
-                searchHistory.addTrack(track)
+        historyAdapter = TrackAdapter(history.toMutableList()) { track ->
+            searchHistory.addTrack(track)
+            val intent = Intent(this, AudioPlayerActivity::class.java)
+            intent.putExtra("TRACK_DATA", track)
+            startActivity(intent)
+        }
+        historyRecyclerView.adapter = historyAdapter
+    }
 
-                val intent = Intent(this, AudioPlayerActivity::class.java)
-                intent.putExtra("TRACK_DATA", track)
-                startActivity(intent)
+    private fun handleTextChange(query: String) {
+        if (query.isEmpty()) {
+            trackList.clear()
+            trackAdapter.notifyDataSetChanged()
+            trackRecyclerView.visibility = View.GONE
+            emptyStateLayout.visibility = View.GONE
+            errorStateLayout.visibility = View.GONE
+
+            val history = searchHistory.getHistory()
+            if (history.isNotEmpty()) {
+                historyContainer.visibility = View.VISIBLE
+                historyAdapter.updateData(history)
+            } else {
+                historyContainer.visibility = View.GONE
             }
         }
-        updateHistoryVisibility(inputEditText.hasFocus())
+    }
+
+    private fun showSearchHistoryIfNotEmpty() {
+        val history = searchHistory.getHistory()
+
+        if (history.isNotEmpty()) {
+            historyAdapter.updateData(history)
+            historyContainer.visibility = View.VISIBLE
+            trackRecyclerView.visibility = View.GONE
+            emptyStateLayout.visibility = View.GONE
+            errorStateLayout.visibility = View.GONE
+        }
     }
 
 
