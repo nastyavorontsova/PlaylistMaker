@@ -21,5 +21,10 @@
     <string name="renew_message">Обновить</string>
     <string name="search_history">Вы искали</string>
     <string name="clear_history">Очистить историю</string>
+    <string name="duration">Длительность</string>
+    <string name="album">Альбом</string>
+    <string name="year">Год</string>
+    <string name="direction">Жанр</string>
+    <string name="country_name">Страна</string>
 
 </resources>
