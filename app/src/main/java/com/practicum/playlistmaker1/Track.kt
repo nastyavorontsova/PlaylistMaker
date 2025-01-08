@@ -14,6 +14,7 @@ data class Track(
     val primaryGenreName: String,
     val country: String,
     val trackTimeMillis: Long,
+    val previewUrl: String,
     val artworkUrl100: String
 ) : Parcelable {
 
@@ -26,7 +27,8 @@ data class Track(
         primaryGenreName = parcel.readString() ?: "",
         country = parcel.readString() ?: "",
         artworkUrl100 = parcel.readString() ?: "",
-        trackTimeMillis = parcel.readLong()
+        trackTimeMillis = parcel.readLong(),
+        previewUrl = parcel.readString() ?: ""
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -39,6 +41,7 @@ data class Track(
         parcel.writeString(country)
         parcel.writeString(artworkUrl100)
         parcel.writeLong(trackTimeMillis)
+        parcel.writeString(previewUrl)
     }
 
     override fun describeContents(): Int {

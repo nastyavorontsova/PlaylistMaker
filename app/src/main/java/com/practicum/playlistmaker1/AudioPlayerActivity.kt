@@ -1,7 +1,9 @@
 package com.practicum.playlistmaker1
 
+import android.media.MediaPlayer
 import android.os.Bundle
-import android.widget.Button
+import android.os.Handler
+import android.os.Looper
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +11,15 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 
 class AudioPlayerActivity : AppCompatActivity() {
+
+    companion object {
+        private const val STATE_DEFAULT = 0
+        private const val STATE_PREPARED = 1
+        private const val STATE_PLAYING = 2
+        private const val STATE_PAUSED = 3
+    }
+
+    private var playerState = STATE_DEFAULT
 
     private lateinit var track: Track
     private lateinit var coverArt: ImageView
@@ -23,6 +34,9 @@ class AudioPlayerActivity : AppCompatActivity() {
     private lateinit var addToFavoritesButton: ImageView
     private lateinit var playPauseButton: ImageView
     private lateinit var progressTextView: TextView
+
+    private var mediaPlayer = MediaPlayer()
+    private lateinit var handler: Handler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +58,11 @@ class AudioPlayerActivity : AppCompatActivity() {
         progressTextView = findViewById(R.id.progress)
 
         setupUI()
-
+        preparePlayer()
+        setupPlayPauseButton()
         setupBackButton()
+
+        handler = Handler(Looper.getMainLooper())
     }
 
     private fun setupUI() {
@@ -81,5 +98,73 @@ class AudioPlayerActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
+    }
+
+    private fun preparePlayer() {
+        mediaPlayer.setDataSource(track.previewUrl)
+        mediaPlayer.prepareAsync()
+        mediaPlayer.setOnPreparedListener {
+            playerState = STATE_PREPARED
+        }
+        mediaPlayer.setOnCompletionListener {
+            resetPlayer()
+        }
+    }
+
+    private fun setupPlayPauseButton() {
+        playPauseButton.setOnClickListener {
+            when (playerState) {
+                STATE_PREPARED, STATE_PAUSED -> startPlayer()
+                STATE_PLAYING -> pausePlayer()
+            }
+        }
+    }
+
+    private fun startPlayer() {
+        mediaPlayer.start()
+        playerState = STATE_PLAYING
+        playPauseButton.setImageResource(R.drawable.ic_pause)
+        updateProgress()
+    }
+
+    private fun pausePlayer() {
+        mediaPlayer.pause()
+        playerState = STATE_PAUSED
+        playPauseButton.setImageResource(R.drawable.ic_play)
+        handler.removeCallbacksAndMessages(null)
+    }
+
+    private fun resetPlayer() {
+        playerState = STATE_PREPARED
+        playPauseButton.setImageResource(R.drawable.ic_play)
+        handler.removeCallbacksAndMessages(null)
+        progressTextView.text = "00:00"
+    }
+
+    private fun updateProgress() {
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                if (playerState == STATE_PLAYING) {
+                    val currentPosition = mediaPlayer.currentPosition / 1000
+                    val minutes = currentPosition / 60
+                    val seconds = currentPosition % 60
+                    progressTextView.text = String.format("%02d:%02d", minutes, seconds)
+                    handler.postDelayed(this, 500)
+                }
+            }
+        }, 500)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (playerState == STATE_PLAYING) {
+            pausePlayer()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer.release()
+        handler.removeCallbacksAndMessages(null)
     }
 }
