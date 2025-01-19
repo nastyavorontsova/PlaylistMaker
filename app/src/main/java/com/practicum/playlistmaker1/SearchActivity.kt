@@ -17,6 +17,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Job
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -34,6 +36,8 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val SEARCH_TEXT_KEY = "search_text"
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
 
     private lateinit var inputEditText: EditText
@@ -44,6 +48,7 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var emptyStateLayout: FrameLayout
     private lateinit var errorStateLayout: FrameLayout
+    private lateinit var progressBar: FrameLayout
 
     private lateinit var retryButton: Button
 
@@ -55,6 +60,14 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearHistoryButton: Button
 
     private lateinit var historyAdapter: TrackAdapter
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val searchRunnable = Runnable {
+        performSearch(searchText)
+    }
+
+    private var isItemClicked = false
+    private var isClickAllowed = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +92,7 @@ class SearchActivity : AppCompatActivity() {
         trackRecyclerView = findViewById(R.id.trackRecyclerView)
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
         errorStateLayout = findViewById(R.id.errorStateLayout)
+        progressBar = findViewById(R.id.progressBar)
 
         retryButton = findViewById(R.id.retryButton)
 
@@ -89,9 +103,11 @@ class SearchActivity : AppCompatActivity() {
 
         trackAdapter = TrackAdapter(trackList) { track ->
             searchHistory.addTrack(track)
+            if (clickDebounce()){
             val intent = Intent(this, AudioPlayerActivity::class.java)
             intent.putExtra("TRACK_DATA", track)
             startActivity(intent)
+            }
         }
 
 
@@ -107,6 +123,7 @@ class SearchActivity : AppCompatActivity() {
             inputEditText.setText("")
             hideKeyboard(it)
 
+            handler.removeCallbacks(searchRunnable)
             trackList.clear()
             trackAdapter.notifyDataSetChanged()
 
@@ -116,15 +133,15 @@ class SearchActivity : AppCompatActivity() {
             updateHistoryVisibility(inputEditText.hasFocus())
         }
 
+
         val simpleTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // empty
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 searchText = s.toString()
-                handleTextChange(s.toString())
                 clearButton.visibility = clearButtonVisibility(s)
+                handleTextChange(searchText)
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -142,7 +159,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         retryButton.setOnClickListener {
-            performSearch(inputEditText.text.toString())
+            performSearch(searchText)
         }
 
         savedInstanceState?.let {
@@ -157,13 +174,19 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun performSearch(term: String) {
+        if (term.isEmpty()) {
+            Log.d("SearchActivity", "performSearch skipped for empty term")
+            return
+        }
 
-        emptyStateLayout.visibility = View.GONE
-        errorStateLayout.visibility = View.GONE
+        Log.d("SearchActivity", "performSearch called with term: '$term'")
+
+        showLoading()
 
         val call = RetrofitClient.apiService.search(term)
         call.enqueue(object : Callback<SongResponse> {
             override fun onResponse(call: Call<SongResponse>, response: Response<SongResponse>) {
+                hideLoading()
                 if (response.isSuccessful && response.body() != null) {
                     val songResponse = response.body()!!
                     if (songResponse.resultCount > 0) {
@@ -180,6 +203,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<SongResponse>, t: Throwable) {
+                hideLoading()
                 showErrorState()
             }
         })
@@ -250,16 +274,50 @@ class SearchActivity : AppCompatActivity() {
     private fun initHistory() {
         val history = searchHistory.getHistory()
         historyAdapter = TrackAdapter(history.toMutableList()) { track ->
-            searchHistory.addTrack(track)
-            val intent = Intent(this, AudioPlayerActivity::class.java)
-            intent.putExtra("TRACK_DATA", track)
-            startActivity(intent)
+            if (clickDebounce()){
+                searchHistory.addTrack(track)
+                val intent = Intent(this, AudioPlayerActivity::class.java)
+                intent.putExtra("TRACK_DATA", track)
+                startActivity(intent)
+            }
         }
         historyRecyclerView.adapter = historyAdapter
     }
 
+    private fun clickDebounce() : Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        if (searchText.isNotEmpty()) {
+            handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+            Log.d("SearchActivity", "Debounce set for term: '$searchText'")
+        } else {
+            Log.d("SearchActivity", "Debounce skipped for empty term")
+        }
+    }
+
+    private fun showLoading() {
+        progressBar.visibility = View.VISIBLE
+        trackRecyclerView.visibility = View.GONE
+        historyContainer.visibility = View.GONE
+        emptyStateLayout.visibility = View.GONE
+        errorStateLayout.visibility = View.GONE
+    }
+
+    private fun hideLoading() {
+        progressBar.visibility = View.GONE
+    }
+
     private fun handleTextChange(query: String) {
         if (query.isEmpty()) {
+            handler.removeCallbacks(searchRunnable)
             trackList.clear()
             trackAdapter.notifyDataSetChanged()
             trackRecyclerView.visibility = View.GONE
@@ -273,6 +331,8 @@ class SearchActivity : AppCompatActivity() {
             } else {
                 historyContainer.visibility = View.GONE
             }
+        } else {
+            searchDebounce()
         }
     }
 
