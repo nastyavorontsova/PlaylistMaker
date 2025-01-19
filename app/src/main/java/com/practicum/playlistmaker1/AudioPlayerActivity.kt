@@ -7,16 +7,17 @@ import android.os.Looper
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 
 class AudioPlayerActivity : AppCompatActivity() {
 
-    companion object {
-        private const val STATE_DEFAULT = 0
-        private const val STATE_PREPARED = 1
-        private const val STATE_PLAYING = 2
-        private const val STATE_PAUSED = 3
+    private companion object {
+        const val STATE_DEFAULT = 0
+        const val STATE_PREPARED = 1
+        const val STATE_PLAYING = 2
+        const val STATE_PAUSED = 3
     }
 
     private var playerState = STATE_DEFAULT
@@ -68,7 +69,7 @@ class AudioPlayerActivity : AppCompatActivity() {
     private fun setupUI() {
         trackNameTextView.text = track.trackName
         artistNameTextView.text = track.artistName
-        albumNameTextView.text = track.collectionName ?: "Неизвестный альбом"
+        albumNameTextView.text = track.collectionName ?: getString(R.string.unknown_album)
         releaseDateTextView.text = track.releaseDate
         genreTextView.text = track.primaryGenreName
         countryTextView.text = track.country

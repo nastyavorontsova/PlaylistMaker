@@ -26,5 +26,6 @@
     <string name="year">Год</string>
     <string name="direction">Жанр</string>
     <string name="country_name">Страна</string>
+    <string name="unknown_album">Неизвестный альбом</string>
 
 </resources>
