@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker1
+package com.practicum.playlistmaker1.domain.models
 
 import android.icu.text.SimpleDateFormat
 import android.os.Parcel

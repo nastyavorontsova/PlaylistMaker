@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker1
+package com.practicum.playlistmaker1.ui.audioplayer
 
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -7,9 +7,10 @@ import android.os.Looper
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.practicum.playlistmaker1.R
+import com.practicum.playlistmaker1.domain.models.Track
 
 class AudioPlayerActivity : AppCompatActivity() {
 

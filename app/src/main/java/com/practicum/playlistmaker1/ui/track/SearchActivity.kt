@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker1
+package com.practicum.playlistmaker1.ui.track
 
 import android.content.Context
 import android.content.Intent
@@ -16,16 +16,23 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.Job
+import com.practicum.playlistmaker1.Creator
+import com.practicum.playlistmaker1.ui.audioplayer.AudioPlayerActivity
+import com.practicum.playlistmaker1.R
+import com.practicum.playlistmaker1.data.TrackRepositoryImpl
+import com.practicum.playlistmaker1.data.network.RetrofitClient
+import com.practicum.playlistmaker1.data.dto.TrackSearchResponse
+import com.practicum.playlistmaker1.data.network.ApiService
+import com.practicum.playlistmaker1.domain.api.TrackInteractor
+import com.practicum.playlistmaker1.domain.api.TrackRepository
+import com.practicum.playlistmaker1.domain.impl.TrackInteractorImpl
+import com.practicum.playlistmaker1.domain.models.Track
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,6 +46,8 @@ class SearchActivity : AppCompatActivity() {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
+
+    private val trackInteractor: TrackInteractor = Creator.provideTrackInteractor()
 
     private lateinit var inputEditText: EditText
     private var searchText: String = ""
@@ -60,6 +69,15 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearHistoryButton: Button
 
     private lateinit var historyAdapter: TrackAdapter
+
+    private val itunesBaseUrl = "https://itunes.apple.com"
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(itunesBaseUrl)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val apiService = retrofit.create(ApiService::class.java)
 
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable {
@@ -183,31 +201,33 @@ class SearchActivity : AppCompatActivity() {
 
         showLoading()
 
-        val call = RetrofitClient.apiService.search(term)
-        call.enqueue(object : Callback<SongResponse> {
-            override fun onResponse(call: Call<SongResponse>, response: Response<SongResponse>) {
-                hideLoading()
-                if (response.isSuccessful && response.body() != null) {
-                    val songResponse = response.body()!!
-                    if (songResponse.resultCount > 0) {
+        trackInteractor.search(term, object : TrackInteractor.TrackConsumer {
+            override fun consume(foundTracks: List<Track>) {
+                runOnUiThread {
+                    hideLoading()
+                    if (foundTracks.isNotEmpty()) {
+                        // Если список треков не пуст
                         trackList.clear()
-                        trackList.addAll(songResponse.results)
+                        trackList.addAll(foundTracks)
                         trackRecyclerView.visibility = View.VISIBLE
                         trackAdapter.notifyDataSetChanged()
                     } else {
+                        // Если список треков пуст
                         showEmptyState()
                     }
-                } else {
+                }
+            }
+        }, object : TrackInteractor.ErrorConsumer {
+            override fun onError() {
+                // Если произошла ошибка (например, нет интернета или ошибка сервера)
+                runOnUiThread {
+                    hideLoading()
                     showErrorState()
                 }
             }
-
-            override fun onFailure(call: Call<SongResponse>, t: Throwable) {
-                hideLoading()
-                showErrorState()
-            }
         })
     }
+
 
     private fun showEmptyState() {
         trackRecyclerView.visibility = View.GONE
