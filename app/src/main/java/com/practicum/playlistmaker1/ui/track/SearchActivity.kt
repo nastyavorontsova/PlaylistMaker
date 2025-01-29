@@ -25,19 +25,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker1.Creator
 import com.practicum.playlistmaker1.ui.audioplayer.AudioPlayerActivity
 import com.practicum.playlistmaker1.R
-import com.practicum.playlistmaker1.data.TrackRepositoryImpl
-import com.practicum.playlistmaker1.data.network.RetrofitClient
-import com.practicum.playlistmaker1.data.dto.TrackSearchResponse
-import com.practicum.playlistmaker1.data.network.ApiService
+import com.practicum.playlistmaker1.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker1.domain.api.TrackInteractor
-import com.practicum.playlistmaker1.domain.api.TrackRepository
-import com.practicum.playlistmaker1.domain.impl.TrackInteractorImpl
 import com.practicum.playlistmaker1.domain.models.Track
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchActivity : AppCompatActivity() {
 
@@ -48,6 +38,8 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private val trackInteractor: TrackInteractor = Creator.provideTrackInteractor()
+    private val searchHistoryInteractor: SearchHistoryInteractor = Creator.provideSearchHistoryInteractor()
+
 
     private lateinit var inputEditText: EditText
     private var searchText: String = ""
@@ -63,28 +55,17 @@ class SearchActivity : AppCompatActivity() {
 
     private var trackList: MutableList<Track> = mutableListOf()
 
-    private lateinit var searchHistory: SearchHistory
     private lateinit var historyRecyclerView: RecyclerView
     private lateinit var historyContainer: ViewGroup
     private lateinit var clearHistoryButton: Button
 
     private lateinit var historyAdapter: TrackAdapter
 
-    private val itunesBaseUrl = "https://itunes.apple.com"
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(itunesBaseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val apiService = retrofit.create(ApiService::class.java)
-
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable {
         performSearch(searchText)
     }
 
-    private var isItemClicked = false
     private var isClickAllowed = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,17 +98,14 @@ class SearchActivity : AppCompatActivity() {
         trackRecyclerView.layoutManager = LinearLayoutManager(this)
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
 
-        searchHistory = SearchHistory(getSharedPreferences("app_preferences", MODE_PRIVATE))
-
         trackAdapter = TrackAdapter(trackList) { track ->
-            searchHistory.addTrack(track)
+            searchHistoryInteractor.addTrack(track)
             if (clickDebounce()){
-            val intent = Intent(this, AudioPlayerActivity::class.java)
-            intent.putExtra("TRACK_DATA", track)
-            startActivity(intent)
+                val intent = Intent(this, AudioPlayerActivity::class.java)
+                intent.putExtra("TRACK_DATA", track)
+                startActivity(intent)
             }
         }
-
 
         trackRecyclerView.adapter = trackAdapter
 
@@ -151,7 +129,6 @@ class SearchActivity : AppCompatActivity() {
             updateHistoryVisibility(inputEditText.hasFocus())
         }
 
-
         val simpleTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
@@ -169,7 +146,7 @@ class SearchActivity : AppCompatActivity() {
 
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                performSearch(inputEditText.text.toString())
+                searchDebounce()
                 true
             } else {
                 false
@@ -186,7 +163,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         clearHistoryButton.setOnClickListener {
-            searchHistory.clearHistory()
+            searchHistoryInteractor.clearHistory()
             updateHistoryVisibility(inputEditText.hasFocus())
         }
     }
@@ -206,20 +183,17 @@ class SearchActivity : AppCompatActivity() {
                 runOnUiThread {
                     hideLoading()
                     if (foundTracks.isNotEmpty()) {
-                        // Если список треков не пуст
                         trackList.clear()
                         trackList.addAll(foundTracks)
                         trackRecyclerView.visibility = View.VISIBLE
                         trackAdapter.notifyDataSetChanged()
                     } else {
-                        // Если список треков пуст
                         showEmptyState()
                     }
                 }
             }
         }, object : TrackInteractor.ErrorConsumer {
             override fun onError() {
-                // Если произошла ошибка (например, нет интернета или ошибка сервера)
                 runOnUiThread {
                     hideLoading()
                     showErrorState()
@@ -257,7 +231,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun updateHistoryVisibility(hasFocus: Boolean) {
-        val history = searchHistory.getHistory()
+        val history = searchHistoryInteractor.getHistory()
 
         if (hasFocus && history.isNotEmpty() && inputEditText.text.isEmpty()) {
             historyAdapter.updateData(history)
@@ -270,7 +244,6 @@ class SearchActivity : AppCompatActivity() {
     private fun initViews() {
         historyRecyclerView = findViewById(R.id.historyRecyclerView)
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
-        searchHistory = SearchHistory(getSharedPreferences("app_preferences", MODE_PRIVATE))
         inputEditText = findViewById(R.id.inputEditText)
         historyContainer = findViewById(R.id.historyContainer)
 
@@ -292,10 +265,9 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initHistory() {
-        val history = searchHistory.getHistory()
-        historyAdapter = TrackAdapter(history.toMutableList()) { track ->
+        historyAdapter = TrackAdapter(searchHistoryInteractor.getHistory().toMutableList()) { track ->
             if (clickDebounce()){
-                searchHistory.addTrack(track)
+                searchHistoryInteractor.addTrack(track)
                 val intent = Intent(this, AudioPlayerActivity::class.java)
                 intent.putExtra("TRACK_DATA", track)
                 startActivity(intent)
@@ -344,7 +316,7 @@ class SearchActivity : AppCompatActivity() {
             emptyStateLayout.visibility = View.GONE
             errorStateLayout.visibility = View.GONE
 
-            val history = searchHistory.getHistory()
+            val history = searchHistoryInteractor.getHistory()
             if (history.isNotEmpty()) {
                 historyContainer.visibility = View.VISIBLE
                 historyAdapter.updateData(history)
@@ -357,7 +329,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showSearchHistoryIfNotEmpty() {
-        val history = searchHistory.getHistory()
+        val history = searchHistoryInteractor.getHistory()
 
         if (history.isNotEmpty()) {
             historyAdapter.updateData(history)
@@ -367,7 +339,6 @@ class SearchActivity : AppCompatActivity() {
             errorStateLayout.visibility = View.GONE
         }
     }
-
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

@@ -15,11 +15,9 @@ class TrackInteractorImpl (private val repository: TrackRepository) : TrackInter
     ) {
         executor.execute {
             try {
-                // Выполняем запрос в фоновом потоке
                 val tracks = repository.search(text)
                 consumer.consume(tracks)
             } catch (e: Exception) {
-                // В случае ошибки вызываем errorConsumer
                 errorConsumer.onError()
             }
         }

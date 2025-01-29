@@ -7,11 +7,17 @@ import com.practicum.playlistmaker1.domain.ThemeManager
 
 class App : Application() {
 
+    companion object {
+        lateinit var instance: App
+            private set
+    }
+
     private lateinit var themeManager: ThemeManager
     var darkTheme = false
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
 
         themeManager = Creator.provideThemeManager(this)
         darkTheme = themeManager.isDarkThemeEnabled()
