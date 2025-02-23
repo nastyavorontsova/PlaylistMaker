@@ -13,16 +13,15 @@ class SearchViewModel(
     private val searchHistoryInteractor: SearchHistoryInteractor
 ) : ViewModel() {
 
-    // LiveData для состояния поиска
-    private val _searchState = MutableLiveData<SearchState>()
-    val searchState: LiveData<SearchState> get() = _searchState
-
-    // LiveData для истории поиска
-    private val _historyState = MutableLiveData<List<Track>>()
-    val historyState: LiveData<List<Track>> get() = _historyState
+    // LiveData для состояния экрана
+    private val _screenState = MutableLiveData<SearchScreenState>()
+    val screenState: LiveData<SearchScreenState> get() = _screenState
 
     // Переменная для хранения текущего запроса
     private var searchText: String = ""
+
+    // Переменная для хранения последних результатов поиска
+    private var lastSearchResults: List<Track> = emptyList()
 
     // Executor для выполнения запросов в фоновом потоке
     private val executor = Executors.newCachedThreadPool()
@@ -41,30 +40,42 @@ class SearchViewModel(
     fun search(query: String) {
         searchText = query
         handler.removeCallbacks(searchRunnable)
-        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+        if (query.isEmpty()) {
+            loadHistory() // Загружаем историю при пустом запросе
+        } else {
+            handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+        }
     }
 
     // Метод для выполнения поиска
     private fun performSearch(term: String) {
         if (term.isEmpty()) {
-            _searchState.value = SearchState.EmptyQuery
+            _screenState.value = SearchScreenState.EmptyQuery
             return
         }
 
-        _searchState.value = SearchState.Loading
+        _screenState.value = SearchScreenState.Loading
 
         executor.execute {
             trackInteractor.search(term, object : TrackInteractor.TrackConsumer {
                 override fun consume(foundTracks: List<Track>) {
+                    lastSearchResults = foundTracks
+                    val history = searchHistoryInteractor.getHistory()
                     if (foundTracks.isNotEmpty()) {
-                        _searchState.postValue(SearchState.Success(foundTracks))
+                        _screenState.postValue(
+                            SearchScreenState.Content(
+                                tracks = foundTracks,
+                                history = history,
+                                isHistoryVisible = false // История скрыта при успешном поиске
+                            )
+                        )
                     } else {
-                        _searchState.postValue(SearchState.EmptyResult)
+                        _screenState.postValue(SearchScreenState.EmptyResult)
                     }
                 }
             }, object : TrackInteractor.ErrorConsumer {
                 override fun onError() {
-                    _searchState.postValue(SearchState.Error)
+                    _screenState.postValue(SearchScreenState.Error)
                 }
             })
         }
@@ -73,7 +84,11 @@ class SearchViewModel(
     // Метод для загрузки истории поиска
     fun loadHistory() {
         val history = searchHistoryInteractor.getHistory()
-        _historyState.value = history
+        _screenState.value = SearchScreenState.Content(
+            tracks = emptyList(), // Пустой список треков
+            history = history,
+            isHistoryVisible = true // История видима
+        )
     }
 
     // Метод для добавления трека в историю
@@ -88,13 +103,8 @@ class SearchViewModel(
         loadHistory()
     }
 
-    // Состояния поиска
-    sealed class SearchState {
-        object Loading : SearchState()
-        object EmptyQuery : SearchState()
-        object EmptyResult : SearchState()
-        object Error : SearchState()
-        data class Success(val tracks: List<Track>) : SearchState()
+    fun getLastSearchResults(): List<Track> {
+        return lastSearchResults
     }
 
     // Очистка ресурсов при уничтожении ViewModel

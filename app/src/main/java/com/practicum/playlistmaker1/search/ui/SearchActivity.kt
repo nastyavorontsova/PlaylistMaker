@@ -66,7 +66,7 @@ class SearchActivity : AppCompatActivity() {
         initAdapters()
 
         // Загрузка истории при создании Activity
-        showEmptyQuery()
+//        showEmptyQuery()
 
         // Наблюдение за изменениями в ViewModel
         observeViewModel()
@@ -81,8 +81,9 @@ class SearchActivity : AppCompatActivity() {
         val clearButton: ImageView = findViewById(R.id.clearIcon)
         clearButton.setOnClickListener {
             inputEditText.setText("")
-            hideKeyboard(it)
             viewModel.search("")
+            hideKeyboard(it)
+            showEmptyQuery()
         }
 
         // Обработка ввода текста
@@ -93,6 +94,11 @@ class SearchActivity : AppCompatActivity() {
                 clearButton.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
                 val query = s?.toString() ?: ""
                 viewModel.search(query)
+
+                // Если текст очищен, показываем историю (если есть фокус)
+                if (query.isEmpty() && inputEditText.hasFocus()) {
+                    viewModel.loadHistory()
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -116,11 +122,31 @@ class SearchActivity : AppCompatActivity() {
 
         // Обработка фокуса на поле ввода
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                viewModel.loadHistory() // Загружаем историю при получении фокуса
+            if (hasFocus && inputEditText.text.isNullOrEmpty()) {
+                // Если поле получило фокус и пустое, показываем историю
+                viewModel.loadHistory()
+            } else {
+                // Иначе обновляем UI в зависимости от текущего состояния
+                observeViewModel()
             }
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // При возврате на экран проверяем состояние поля ввода
+        if (inputEditText.text.isNullOrEmpty() && inputEditText.hasFocus()) {
+            viewModel.loadHistory()
+        } else {
+            // Показываем последние результаты поиска, если они есть
+            val lastResults = viewModel.getLastSearchResults()
+            if (lastResults.isNotEmpty()) {
+                showContent(lastResults, emptyList(), isHistoryVisible = false)
+            } else {
+                observeViewModel()
+            }
+        }
     }
 
     private fun initViews() {
@@ -159,20 +185,38 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.searchState.observe(this, { state ->
+        viewModel.screenState.observe(this) { state ->
             when (state) {
-                is SearchViewModel.SearchState.Loading -> showLoading()
-                is SearchViewModel.SearchState.EmptyQuery -> showEmptyQuery()
-                is SearchViewModel.SearchState.EmptyResult -> showEmptyResult()
-                is SearchViewModel.SearchState.Error -> showError()
-                is SearchViewModel.SearchState.Success -> showTracks(state.tracks)
+                is SearchScreenState.Content -> {
+                    showContent(state.tracks, state.history, state.isHistoryVisible)
+                }
+                SearchScreenState.Loading -> showLoading()
+                SearchScreenState.EmptyQuery -> showEmptyQuery()
+                SearchScreenState.EmptyResult -> showEmptyResult()
+                SearchScreenState.Error -> showError()
             }
-        })
+        }
+    }
 
-        viewModel.historyState.observe(this, { history ->
+    private fun showContent(tracks: List<Track>, history: List<Track>, isHistoryVisible: Boolean) {
+        val isInputEmpty = inputEditText.text.isNullOrEmpty()
+        val hasFocus = inputEditText.hasFocus()
+
+        if (isInputEmpty && hasFocus && history.isNotEmpty()) {
+            // Показываем историю, если поле пустое, имеет фокус и есть треки в истории
             historyAdapter.updateData(history)
-            updateHistoryVisibility(history.isNotEmpty())
-        })
+            historyContainer.visibility = View.VISIBLE
+            trackRecyclerView.visibility = View.GONE
+        } else {
+            // Показываем результаты поиска
+            trackAdapter.updateData(tracks)
+            trackRecyclerView.visibility = View.VISIBLE
+            historyContainer.visibility = View.GONE
+        }
+
+        progressBar.visibility = View.GONE
+        emptyStateLayout.visibility = View.GONE
+        errorStateLayout.visibility = View.GONE
     }
 
     private fun showLoading() {
@@ -190,9 +234,10 @@ class SearchActivity : AppCompatActivity() {
         errorStateLayout.visibility = View.GONE
 
         // Проверяем, есть ли треки в истории
-        val history = viewModel.historyState.value ?: emptyList()
+        val history = (viewModel.screenState.value as? SearchScreenState.Content)?.history ?: emptyList()
         if (history.isNotEmpty()) {
             historyContainer.visibility = View.VISIBLE
+            historyAdapter.updateData(history)
         } else {
             historyContainer.visibility = View.GONE
         }
@@ -212,20 +257,6 @@ class SearchActivity : AppCompatActivity() {
         emptyStateLayout.visibility = View.GONE
         errorStateLayout.visibility = View.VISIBLE
         historyContainer.visibility = View.GONE
-    }
-
-    private fun showTracks(tracks: List<Track>) {
-        progressBar.visibility = View.GONE
-        trackRecyclerView.visibility = View.VISIBLE
-        emptyStateLayout.visibility = View.GONE
-        errorStateLayout.visibility = View.GONE
-        historyContainer.visibility = View.GONE
-        trackAdapter.updateData(tracks)
-    }
-
-    private fun updateHistoryVisibility(hasHistory: Boolean) {
-        val hasFocus = inputEditText.hasFocus()
-        historyContainer.visibility = if (hasHistory && hasFocus) View.VISIBLE else View.GONE
     }
 
     private fun navigateToPlayer(track: Track) {

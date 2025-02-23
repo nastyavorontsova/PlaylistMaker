@@ -1,23 +1,27 @@
 package com.practicum.playlistmaker1.settings.ui
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.practicum.playlistmaker1.creator.App
-import com.practicum.playlistmaker1.settings.domain.ThemeManager
 import com.practicum.playlistmaker1.sharing.domain.SharingManager
+import com.practicum.playlistmaker1.settings.domain.ThemeManager
 
 class SettingsViewModel(
     private val themeManager: ThemeManager,
-    private val sharingManager: SharingManager,
-    private val app: App
+    private val sharingManager: SharingManager
 ) : ViewModel() {
 
-    fun isDarkThemeEnabled(): Boolean {
-        return themeManager.isDarkThemeEnabled()
+    private val _themeState = MutableLiveData<Boolean>()
+    val themeState: LiveData<Boolean> get() = _themeState
+
+    init {
+        // Инициализация начального состояния темы
+        _themeState.value = themeManager.isDarkThemeEnabled()
     }
 
     fun switchTheme(enabled: Boolean) {
         themeManager.setDarkThemeEnabled(enabled)
-        app.switchTheme(enabled)
+        _themeState.value = enabled // Обновляем состояние темы
     }
 
     fun shareApp() {

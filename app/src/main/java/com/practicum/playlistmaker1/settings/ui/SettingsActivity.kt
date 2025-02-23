@@ -1,17 +1,17 @@
 package com.practicum.playlistmaker1.settings.ui
 
+import android.os.Bundle
 import android.widget.ImageView
 import android.widget.LinearLayout
-import com.practicum.playlistmaker1.creator.Creator
-import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.practicum.playlistmaker1.R
-import com.practicum.playlistmaker1.creator.App
+import com.practicum.playlistmaker1.creator.Creator
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -30,8 +30,7 @@ class SettingsActivity : AppCompatActivity() {
         // Инициализация ViewModel
         val themeManager = Creator.provideThemeManager(this)
         val sharingManager = Creator.provideSharingManager(this)
-        val app = application as App
-        val viewModelFactory = SettingsViewModelFactory(themeManager, sharingManager, app)
+        val viewModelFactory = SettingsViewModelFactory(themeManager, sharingManager)
         viewModel = ViewModelProvider(this, viewModelFactory).get(SettingsViewModel::class.java)
 
         // Инициализация View элементов
@@ -42,7 +41,7 @@ class SettingsActivity : AppCompatActivity() {
         val privacyAgreementButton: LinearLayout = findViewById(R.id.privacy_agreement_button)
 
         // Установка начального состояния переключателя темы
-        themeSwitcher.isChecked = viewModel.isDarkThemeEnabled()
+        themeSwitcher.isChecked = viewModel.themeState.value ?: false
 
         // Обработка нажатия на кнопку "Назад"
         buttonSettingsArrowBack.setOnClickListener {
@@ -52,7 +51,11 @@ class SettingsActivity : AppCompatActivity() {
         // Обработка изменения темы
         themeSwitcher.setOnCheckedChangeListener { _, checked ->
             viewModel.switchTheme(checked)
-            restartActivity() // Перезапуск текущей Activity
+        }
+
+        // Подписка на изменения темы
+        viewModel.themeState.observe(this) { isDarkThemeEnabled ->
+            applyTheme(isDarkThemeEnabled)
         }
 
         // Обработка нажатия на кнопку "Поделиться"
@@ -71,9 +74,13 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun restartActivity() {
-        val intent = intent
-        finish()
-        startActivity(intent)
+    private fun applyTheme(isDarkThemeEnabled: Boolean) {
+        AppCompatDelegate.setDefaultNightMode(
+            if (isDarkThemeEnabled) {
+                AppCompatDelegate.MODE_NIGHT_YES
+            } else {
+                AppCompatDelegate.MODE_NIGHT_NO
+            }
+        )
     }
 }

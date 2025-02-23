@@ -1,6 +1,8 @@
 package com.practicum.playlistmaker1.player.ui
 
 import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +19,16 @@ class AudioPlayerViewModel : ViewModel() {
 
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var track: Track
-    private val executor = Executors.newSingleThreadExecutor()
+
+    // Handler для обновления прогресса
+    private val handler = Handler(Looper.getMainLooper())
+    private val updateProgressRunnable = object : Runnable {
+        override fun run() {
+            updateProgress()
+            // Повторяем задачу каждые 500 мс
+            handler.postDelayed(this, 500)
+        }
+    }
 
     fun initialize(track: Track) {
         this.track = track
@@ -34,6 +45,8 @@ class AudioPlayerViewModel : ViewModel() {
         mediaPlayer.setOnCompletionListener {
             _playerState.value = PlayerState.PREPARED
             _progress.value = "00:00"
+            // Останавливаем обновление прогресса при завершении воспроизведения
+            handler.removeCallbacks(updateProgressRunnable)
         }
     }
 
@@ -42,7 +55,6 @@ class AudioPlayerViewModel : ViewModel() {
             PlayerState.PREPARED, PlayerState.PAUSED -> startPlayer()
             PlayerState.PLAYING -> pausePlayer()
             else -> {
-
                 mediaPlayer.setOnPreparedListener {
                     _playerState.value = PlayerState.PREPARED
                     startPlayer()
@@ -54,30 +66,29 @@ class AudioPlayerViewModel : ViewModel() {
     private fun startPlayer() {
         mediaPlayer.start()
         _playerState.value = PlayerState.PLAYING
-        updateProgress()
+        // Запускаем обновление прогресса
+        handler.post(updateProgressRunnable)
     }
 
     private fun pausePlayer() {
         mediaPlayer.pause()
         _playerState.value = PlayerState.PAUSED
+        // Останавливаем обновление прогресса при паузе
+        handler.removeCallbacks(updateProgressRunnable)
     }
 
     private fun updateProgress() {
-        executor.execute {
-            while (mediaPlayer.isPlaying) {
-                val currentPosition = mediaPlayer.currentPosition / 1000
-                val minutes = currentPosition / 60
-                val seconds = currentPosition % 60
-                _progress.postValue(String.format("%02d:%02d", minutes, seconds))
-                Thread.sleep(500)
-            }
-        }
+        val currentPosition = mediaPlayer.currentPosition / 1000
+        val minutes = currentPosition / 60
+        val seconds = currentPosition % 60
+        _progress.value = String.format("%02d:%02d", minutes, seconds)
     }
 
     override fun onCleared() {
         super.onCleared()
         mediaPlayer.release()
-        executor.shutdown()
+        // Останавливаем Handler при очистке ViewModel
+        handler.removeCallbacks(updateProgressRunnable)
     }
 
     enum class PlayerState {

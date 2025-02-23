@@ -15,20 +15,16 @@ class App : Application() {
     }
 
     private lateinit var themeManager: ThemeManager
-    var darkTheme = false
 
     override fun onCreate() {
         super.onCreate()
         instance = this
 
         themeManager = Creator.provideThemeManager(this)
-        darkTheme = themeManager.isDarkThemeEnabled()
-
-        switchTheme(darkTheme)
+        applyTheme(themeManager.isDarkThemeEnabled())
     }
 
-    fun switchTheme(darkThemeEnabled: Boolean) {
-        darkTheme = darkThemeEnabled
+    fun applyTheme(darkThemeEnabled: Boolean) {
         AppCompatDelegate.setDefaultNightMode(
             if (darkThemeEnabled) {
                 AppCompatDelegate.MODE_NIGHT_YES
@@ -36,7 +32,5 @@ class App : Application() {
                 AppCompatDelegate.MODE_NIGHT_NO
             }
         )
-
-        themeManager.setDarkThemeEnabled(darkThemeEnabled)
     }
 }
