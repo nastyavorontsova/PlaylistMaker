@@ -7,15 +7,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.search.domain.models.Track
 
+import org.koin.androidx.viewmodel.ext.android.viewModel
+
 class AudioPlayerActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: AudioPlayerViewModel
+    private val viewModel: AudioPlayerViewModel by viewModel<AudioPlayerViewModel>()
+
     private lateinit var track: Track
 
     private lateinit var coverArt: ImageView
@@ -43,7 +45,7 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         track = intent.getParcelableExtra("TRACK_DATA") ?: return
 
-        viewModel = ViewModelProvider(this).get(AudioPlayerViewModel::class.java)
+        // Инициализация ViewModel с треком
         viewModel.initialize(track)
 
         coverArt = findViewById(R.id.coverArt)
@@ -118,5 +120,10 @@ class AudioPlayerActivity : AppCompatActivity() {
         if (viewModel.playerState.value == AudioPlayerViewModel.PlayerState.PLAYING) {
             viewModel.playPause()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.releaseMediaPlayer() // Освобождаем MediaPlayer при уничтожении Activity
     }
 }

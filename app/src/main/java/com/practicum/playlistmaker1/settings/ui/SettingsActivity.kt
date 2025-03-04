@@ -1,5 +1,7 @@
 package com.practicum.playlistmaker1.settings.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -7,15 +9,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.practicum.playlistmaker1.R
-import com.practicum.playlistmaker1.creator.Creator
+import com.practicum.playlistmaker1.sharing.domain.Event
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: SettingsViewModel
+    private val viewModel: SettingsViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +28,6 @@ class SettingsActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        // Инициализация ViewModel
-        val themeManager = Creator.provideThemeManager(this)
-        val sharingManager = Creator.provideSharingManager(this)
-        val viewModelFactory = SettingsViewModelFactory(themeManager, sharingManager)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(SettingsViewModel::class.java)
 
         // Инициализация View элементов
         val buttonSettingsArrowBack: ImageView = findViewById(R.id.settings_arrow_back)
@@ -72,6 +68,14 @@ class SettingsActivity : AppCompatActivity() {
         privacyAgreementButton.setOnClickListener {
             viewModel.openPrivacyAgreement()
         }
+
+        viewModel.event.observe(this) { event ->
+            when (event) {
+                is Event.ShareApp -> shareApp()
+                is Event.OpenSupport -> openSupport()
+                is Event.OpenPrivacyAgreement -> openPrivacyAgreement()
+            }
+        }
     }
 
     private fun applyTheme(isDarkThemeEnabled: Boolean) {
@@ -82,5 +86,38 @@ class SettingsActivity : AppCompatActivity() {
                 AppCompatDelegate.MODE_NIGHT_NO
             }
         )
+    }
+
+    private fun shareApp() {
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text))
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(shareIntent, null))
+    }
+
+    private fun openSupport() {
+        val email = getString(R.string.support_email)
+        val subject = getString(R.string.support_subject)
+        val body = getString(R.string.support_body)
+
+        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
+        startActivity(Intent.createChooser(emailIntent, null))
+    }
+
+    private fun openPrivacyAgreement() {
+        val url = getString(R.string.user_agreement_url)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(url)
+            flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        startActivity(intent)
     }
 }

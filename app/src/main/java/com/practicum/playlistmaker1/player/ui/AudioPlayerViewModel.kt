@@ -9,7 +9,9 @@ import androidx.lifecycle.ViewModel
 import com.practicum.playlistmaker1.search.domain.models.Track
 import java.util.concurrent.Executors
 
-class AudioPlayerViewModel : ViewModel() {
+class AudioPlayerViewModel(
+    private var mediaPlayer: MediaPlayer
+) : ViewModel() {
 
     private val _playerState = MutableLiveData<PlayerState>()
     val playerState: LiveData<PlayerState> get() = _playerState
@@ -17,7 +19,6 @@ class AudioPlayerViewModel : ViewModel() {
     private val _progress = MutableLiveData<String>()
     val progress: LiveData<String> get() = _progress
 
-    private lateinit var mediaPlayer: MediaPlayer
     private lateinit var track: Track
 
     // Handler для обновления прогресса
@@ -89,6 +90,10 @@ class AudioPlayerViewModel : ViewModel() {
         mediaPlayer.release()
         // Останавливаем Handler при очистке ViewModel
         handler.removeCallbacks(updateProgressRunnable)
+    }
+
+    fun releaseMediaPlayer() {
+        mediaPlayer.release()
     }
 
     enum class PlayerState {

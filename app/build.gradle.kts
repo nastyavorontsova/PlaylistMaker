@@ -54,4 +54,6 @@ dependencies {
     implementation ("androidx.constraintlayout:constraintlayout:2.0.0")
     implementation ("androidx.core:core-ktx:1.9.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("io.insert-koin:koin-android:3.3.0")
+//    implementation("io.insert-koin:koin-androidx-viewmodel:3.3.0")
 }

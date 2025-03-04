@@ -15,17 +15,18 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker1.R
-import com.practicum.playlistmaker1.creator.Creator
 import com.practicum.playlistmaker1.player.ui.AudioPlayerActivity
 import com.practicum.playlistmaker1.search.domain.models.Track
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: SearchViewModel
+    private val viewModel: SearchViewModel by viewModel()
+
+
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
 
@@ -52,12 +53,6 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        val trackInteractor = Creator.provideTrackInteractor()
-        val searchHistoryInteractor = Creator.provideSearchHistoryInteractor()
-
-        // Инициализация ViewModel
-        val viewModelFactory = SearchViewModelFactory(trackInteractor, searchHistoryInteractor)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(SearchViewModel::class.java)
 
         // Инициализация View элементов
         initViews()
