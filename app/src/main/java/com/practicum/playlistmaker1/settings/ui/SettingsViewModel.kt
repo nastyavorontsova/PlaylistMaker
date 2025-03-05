@@ -29,14 +29,14 @@ class SettingsViewModel(
     }
 
     fun shareApp() {
-        _event.value = sharingManager.shareApp() // Вызываем метод без передачи Context
+        _event.value = sharingManager.shareApp()
     }
 
     fun openSupport() {
-        _event.value = sharingManager.openSupport() // Вызываем метод без передачи Context
+        _event.value = sharingManager.openSupport()
     }
 
     fun openPrivacyAgreement() {
-        _event.value = sharingManager.openPrivacyAgreement() // Вызываем метод без передачи Context
+        _event.value = sharingManager.openPrivacyAgreement()
     }
 }
