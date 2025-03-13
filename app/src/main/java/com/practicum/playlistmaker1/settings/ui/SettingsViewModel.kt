@@ -1,10 +1,12 @@
 package com.practicum.playlistmaker1.settings.ui
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.practicum.playlistmaker1.sharing.domain.SharingManager
 import com.practicum.playlistmaker1.settings.domain.ThemeManager
+import com.practicum.playlistmaker1.sharing.domain.Event
 
 class SettingsViewModel(
     private val themeManager: ThemeManager,
@@ -14,25 +16,27 @@ class SettingsViewModel(
     private val _themeState = MutableLiveData<Boolean>()
     val themeState: LiveData<Boolean> get() = _themeState
 
+    private val _event = MutableLiveData<Event>()
+    val event: LiveData<Event> get() = _event
+
     init {
-        // Инициализация начального состояния темы
         _themeState.value = themeManager.isDarkThemeEnabled()
     }
 
     fun switchTheme(enabled: Boolean) {
         themeManager.setDarkThemeEnabled(enabled)
-        _themeState.value = enabled // Обновляем состояние темы
+        _themeState.value = enabled
     }
 
     fun shareApp() {
-        sharingManager.shareApp()
+        _event.value = sharingManager.shareApp()
     }
 
     fun openSupport() {
-        sharingManager.openSupport()
+        _event.value = sharingManager.openSupport()
     }
 
     fun openPrivacyAgreement() {
-        sharingManager.openPrivacyAgreement()
+        _event.value = sharingManager.openPrivacyAgreement()
     }
 }
