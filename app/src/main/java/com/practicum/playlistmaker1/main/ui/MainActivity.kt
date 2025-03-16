@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import com.practicum.playlistmaker1.R
-import com.practicum.playlistmaker1.media.ui.MediaActivity
+import com.practicum.playlistmaker1.media.ui.MediaLibraryActivity
 import com.practicum.playlistmaker1.settings.ui.SettingsActivity
 import com.practicum.playlistmaker1.search.ui.SearchActivity
 
@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         buttonSearchMain.setOnClickListener(buttonClickListener)
 
         buttonMediaMain.setOnClickListener {
-            val mediaIntent = Intent(this, MediaActivity::class.java)
+            val mediaIntent = Intent(this, MediaLibraryActivity::class.java)
             startActivity(mediaIntent)
         }
 
