@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.drawable.DrawableCompat.applyTheme
 import com.practicum.playlistmaker1.app.di.appModule
+import com.practicum.playlistmaker1.media.ui.mediaModule
 import com.practicum.playlistmaker1.player.di.audioPlayerModule
 import com.practicum.playlistmaker1.search.di.data.networkModule
 import com.practicum.playlistmaker1.search.di.data.repositoryModule
@@ -44,7 +45,8 @@ class App : Application() {
                     interactorModule,
                     sharingModule,
                     settingsViewModelModule,
-                    searchViewModelModule
+                    searchViewModelModule,
+                    mediaModule
                 )
             )
         }
