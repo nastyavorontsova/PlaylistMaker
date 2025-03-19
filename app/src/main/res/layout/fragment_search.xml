@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".search.ui.SearchActivity">
+    tools:context=".search.ui.SearchFragment">
 
     <LinearLayout
         style="@style/SecondaryLayoutStyle"
@@ -22,16 +22,6 @@
             android:orientation="horizontal"
             android:padding="@dimen/header_padding"
             tools:ignore="MissingConstraints">
-
-            <ImageView
-                android:id="@+id/search_arrow_back"
-                android:layout_width="@dimen/arrow_sizes"
-                android:layout_height="@dimen/arrow_sizes"
-                android:background="?attr/selectableItemBackground"
-                android:padding="@dimen/padding_start_size"
-                android:src="@drawable/ic_arrow_back"
-                android:tint="?attr/colorPrimaryVariant"
-                tools:ignore="UseAppTint" />
 
             <TextView
                 android:layout_width="wrap_content"
