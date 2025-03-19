@@ -3,79 +3,77 @@ package com.practicum.playlistmaker1.settings.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.ImageView
-import android.widget.LinearLayout
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
-import com.google.android.material.switchmaterial.SwitchMaterial
+import androidx.fragment.app.Fragment
 import com.practicum.playlistmaker1.R
-import com.practicum.playlistmaker1.sharing.domain.Event
+import com.practicum.playlistmaker1.databinding.FragmentSettingsBinding
+import com.practicum.playlistmaker1.sharing.domain.EventType
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SettingsActivity : AppCompatActivity() {
 
-    private val viewModel: SettingsViewModel by viewModel()
+class SettingsFragment : Fragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_settings)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+    private val viewModel by viewModel<SettingsViewModel>()
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
 
-        // Инициализация View элементов
-        val buttonSettingsArrowBack: ImageView = findViewById(R.id.settings_arrow_back)
-        val themeSwitcher: SwitchMaterial = findViewById(R.id.themeSwitcher)
-        val shareButton: LinearLayout = findViewById(R.id.share_button)
-        val supportButton: LinearLayout = findViewById(R.id.support_button)
-        val privacyAgreementButton: LinearLayout = findViewById(R.id.privacy_agreement_button)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // Установка начального состояния переключателя темы
-        themeSwitcher.isChecked = viewModel.themeState.value ?: false
-
-        // Обработка нажатия на кнопку "Назад"
-        buttonSettingsArrowBack.setOnClickListener {
-            finish()
-        }
+        binding.themeSwitcher.isChecked = viewModel.themeState.value ?: false
 
         // Обработка изменения темы
-        themeSwitcher.setOnCheckedChangeListener { _, checked ->
+        binding.themeSwitcher.setOnCheckedChangeListener { _, checked ->
             viewModel.switchTheme(checked)
         }
 
         // Подписка на изменения темы
-        viewModel.themeState.observe(this) { isDarkThemeEnabled ->
+        viewModel.themeState.observe(viewLifecycleOwner) { isDarkThemeEnabled ->
             applyTheme(isDarkThemeEnabled)
         }
 
         // Обработка нажатия на кнопку "Поделиться"
-        shareButton.setOnClickListener {
+        binding.shareButton.setOnClickListener {
             viewModel.shareApp()
         }
 
         // Обработка нажатия на кнопку "Написать в поддержку"
-        supportButton.setOnClickListener {
+        binding.supportButton.setOnClickListener {
             viewModel.openSupport()
         }
 
         // Обработка нажатия на кнопку "Пользовательское соглашение"
-        privacyAgreementButton.setOnClickListener {
+        binding.privacyAgreementButton.setOnClickListener {
             viewModel.openPrivacyAgreement()
         }
 
-        viewModel.event.observe(this) { event ->
-            when (event) {
-                is Event.ShareApp -> shareApp()
-                is Event.OpenSupport -> openSupport()
-                is Event.OpenPrivacyAgreement -> openPrivacyAgreement()
+        // Подписка на события
+        viewModel.event.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { eventType ->
+                when (eventType) {
+                    EventType.ShareApp -> shareApp()
+                    EventType.OpenSupport -> openSupport()
+                    EventType.OpenPrivacyAgreement -> openPrivacyAgreement()
+                }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun applyTheme(isDarkThemeEnabled: Boolean) {
@@ -115,8 +113,7 @@ class SettingsActivity : AppCompatActivity() {
         val url = getString(R.string.user_agreement_url)
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(url)
-            flags =
-                Intent.FLAG_ACTIVITY_NEW_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         startActivity(intent)
     }
