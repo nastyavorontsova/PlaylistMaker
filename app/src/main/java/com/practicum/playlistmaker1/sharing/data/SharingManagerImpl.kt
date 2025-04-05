@@ -1,19 +1,19 @@
 package com.practicum.playlistmaker1.sharing.data
 
 import com.practicum.playlistmaker1.sharing.domain.SharingManager
-import com.practicum.playlistmaker1.sharing.domain.Event
+import com.practicum.playlistmaker1.sharing.domain.EventType
 
 class SharingManagerImpl : SharingManager {
 
-    override fun shareApp(): Event {
-        return Event.ShareApp
+    override fun shareApp(): EventType {
+        return EventType.ShareApp
     }
 
-    override fun openSupport(): Event {
-        return Event.OpenSupport
+    override fun openSupport(): EventType {
+        return EventType.OpenSupport
     }
 
-    override fun openPrivacyAgreement(): Event {
-        return Event.OpenPrivacyAgreement
+    override fun openPrivacyAgreement(): EventType {
+        return EventType.OpenPrivacyAgreement
     }
 }
