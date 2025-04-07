@@ -28,16 +28,6 @@ class AudioPlayerViewModel(
 
     private var progressUpdateJob: Job? = null
 
-//    // Handler для обновления прогресса
-//    private val handler = Handler(Looper.getMainLooper())
-//    private val updateProgressRunnable = object : Runnable {
-//        override fun run() {
-//            updateProgress()
-//            // Повторяем задачу каждые 500 мс
-//            handler.postDelayed(this, 500)
-//        }
-//    }
-
     fun initialize(track: Track) {
         this.track = track
         mediaPlayer = MediaPlayer()
