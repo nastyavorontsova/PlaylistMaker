@@ -6,7 +6,12 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker1.search.domain.models.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 class AudioPlayerViewModel(
@@ -21,15 +26,17 @@ class AudioPlayerViewModel(
 
     private lateinit var track: Track
 
-    // Handler для обновления прогресса
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateProgressRunnable = object : Runnable {
-        override fun run() {
-            updateProgress()
-            // Повторяем задачу каждые 500 мс
-            handler.postDelayed(this, 500)
-        }
-    }
+    private var progressUpdateJob: Job? = null
+
+//    // Handler для обновления прогресса
+//    private val handler = Handler(Looper.getMainLooper())
+//    private val updateProgressRunnable = object : Runnable {
+//        override fun run() {
+//            updateProgress()
+//            // Повторяем задачу каждые 500 мс
+//            handler.postDelayed(this, 500)
+//        }
+//    }
 
     fun initialize(track: Track) {
         this.track = track
@@ -47,7 +54,7 @@ class AudioPlayerViewModel(
             _playerState.value = PlayerState.PREPARED
             _progress.value = "00:00"
             // Останавливаем обновление прогресса при завершении воспроизведения
-            handler.removeCallbacks(updateProgressRunnable)
+            progressUpdateJob?.cancel()
         }
     }
 
@@ -68,14 +75,26 @@ class AudioPlayerViewModel(
         mediaPlayer.start()
         _playerState.value = PlayerState.PLAYING
         // Запускаем обновление прогресса
-        handler.post(updateProgressRunnable)
+        startProgressUpdates()
     }
 
     private fun pausePlayer() {
         mediaPlayer.pause()
         _playerState.value = PlayerState.PAUSED
         // Останавливаем обновление прогресса при паузе
-        handler.removeCallbacks(updateProgressRunnable)
+        progressUpdateJob?.cancel()
+    }
+
+    private fun startProgressUpdates() {
+
+        progressUpdateJob?.cancel()
+
+        progressUpdateJob = viewModelScope.launch {
+            while (isActive) {
+                updateProgress()
+                delay(300) // Обновляем каждые 300 мс
+            }
+        }
     }
 
     private fun updateProgress() {
@@ -89,7 +108,7 @@ class AudioPlayerViewModel(
         super.onCleared()
         mediaPlayer.release()
         // Останавливаем Handler при очистке ViewModel
-        handler.removeCallbacks(updateProgressRunnable)
+        progressUpdateJob?.cancel()
     }
 
     fun releaseMediaPlayer() {

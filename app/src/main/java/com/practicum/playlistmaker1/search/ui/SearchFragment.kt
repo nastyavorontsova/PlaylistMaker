@@ -3,8 +3,6 @@ package com.practicum.playlistmaker1.search.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -12,10 +10,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker1.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker1.player.ui.AudioPlayerActivity
 import com.practicum.playlistmaker1.search.domain.models.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : Fragment() {
@@ -27,11 +29,10 @@ class SearchFragment : Fragment() {
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
 
-    private val handler = Handler(Looper.getMainLooper())
     private var isClickAllowed = true
+    private var debounceJob: Job? = null
 
     companion object {
-        private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
 
@@ -92,7 +93,7 @@ class SearchFragment : Fragment() {
         })
 
         binding.retryButton.setOnClickListener {
-            viewModel.search(binding.inputEditText.text.toString())
+            viewModel.search(binding.inputEditText.text.toString(), isRetry = true)
         }
 
         binding.clearHistoryButton.setOnClickListener {
@@ -130,6 +131,7 @@ class SearchFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        debounceJob?.cancel()
         _binding = null
     }
 
@@ -246,7 +248,11 @@ class SearchFragment : Fragment() {
         val current = isClickAllowed
         if (isClickAllowed) {
             isClickAllowed = false
-            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+            debounceJob?.cancel()
+            debounceJob = viewLifecycleOwner.lifecycleScope.launch {
+                delay(CLICK_DEBOUNCE_DELAY)
+                isClickAllowed = true
+            }
         }
         return current
     }
