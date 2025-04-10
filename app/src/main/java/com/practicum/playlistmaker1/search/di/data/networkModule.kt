@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.practicum.playlistmaker1.search.data.NetworkClient
 import com.practicum.playlistmaker1.search.data.network.ApiService
 import com.practicum.playlistmaker1.search.data.network.RetrofitNetworkClient
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -20,5 +21,5 @@ val networkModule = module {
 
     factory { Gson() }
 
-    single<NetworkClient> { RetrofitNetworkClient(get()) }
+    single<NetworkClient> { RetrofitNetworkClient(get(), androidContext()) }
 }

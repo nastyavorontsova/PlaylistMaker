@@ -3,14 +3,19 @@ package com.practicum.playlistmaker1.search.ui
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker1.app.Event
+import com.practicum.playlistmaker1.search.data.dto.NetworkResult
 import com.practicum.playlistmaker1.search.domain.api.SearchHistoryInteractor
-import com.practicum.playlistmaker1.search.domain.api.TrackInteractor
+import com.practicum.playlistmaker1.search.domain.api.SuspendTrackInteractor
 import com.practicum.playlistmaker1.search.domain.models.Track
-import java.util.concurrent.Executors
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 class SearchViewModel(
-    private val trackInteractor: TrackInteractor,
+    private val suspendTrackInteractor: SuspendTrackInteractor,
     private val searchHistoryInteractor: SearchHistoryInteractor
 ) : ViewModel() {
 
@@ -19,100 +24,100 @@ class SearchViewModel(
 
     private var searchText: String = ""
     private var lastSearchResults: List<Track> = emptyList()
-    private var lastSearchQuery: String? = null // Храним последний запрос
-
-    private val executor = Executors.newCachedThreadPool()
-    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
-    private val searchRunnable = Runnable {
-        performSearch(searchText)
-    }
+    private var lastSearchQuery: String? = null
+    private var searchJob: Job? = null
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
     }
 
-    fun search(query: String) {
-        // Если запрос не изменился, не выполняем поиск
-        if (query == lastSearchQuery) {
-            return
-        }
+    fun search(query: String, isRetry: Boolean = false) {
+        if (!isRetry && query == lastSearchQuery) return
 
         searchText = query
-        lastSearchQuery = query // Сохраняем последний запрос
-        handler.removeCallbacks(searchRunnable)
+        lastSearchQuery = query
+        searchJob?.cancel()
+
         if (query.isEmpty()) {
             loadHistory()
         } else {
-            handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+            searchJob = viewModelScope.launch {
+                if (!isRetry) {
+                    delay(SEARCH_DEBOUNCE_DELAY)
+                }
+                performSearch(searchText)
+            }
         }
     }
 
-    private fun performSearch(term: String) {
+    private suspend fun performSearch(term: String) {
         if (term.isEmpty()) {
-            _screenState.value = Event(SearchScreenState.EmptyQuery)
+            _screenState.postValue(Event(SearchScreenState.EmptyQuery))
             return
         }
 
-        _screenState.value = Event(SearchScreenState.Loading)
+        _screenState.postValue(Event(SearchScreenState.Loading))
 
-        executor.execute {
-            trackInteractor.search(term, object : TrackInteractor.TrackConsumer {
-                override fun consume(foundTracks: List<Track>) {
-                    lastSearchResults = foundTracks
-                    val history = searchHistoryInteractor.getHistory()
-                    if (foundTracks.isNotEmpty()) {
-                        _screenState.postValue(
-                            Event(
-                                SearchScreenState.Content(
-                                    tracks = foundTracks,
-                                    history = history,
-                                    isHistoryVisible = false
+        suspendTrackInteractor.search(term)
+            .collect { result ->
+                when (result) {
+                    is NetworkResult.Success<List<Track>> -> {
+                        lastSearchResults = result.data
+                        val history = searchHistoryInteractor.getHistory()
+
+                        if (result.data.isEmpty()) {
+                            _screenState.postValue(Event(SearchScreenState.EmptyResult))
+                        } else {
+                            _screenState.postValue(
+                                Event(
+                                    SearchScreenState.Content(
+                                        tracks = result.data,
+                                        history = history,
+                                        isHistoryVisible = false
+                                    )
                                 )
                             )
-                        )
-                    } else {
-                        _screenState.postValue(Event(SearchScreenState.EmptyResult))
+                        }
+                    }
+                    is NetworkResult.Error -> {
+                        _screenState.postValue(Event(SearchScreenState.Error))
                     }
                 }
-            }, object : TrackInteractor.ErrorConsumer {
-                override fun onError() {
-                    _screenState.postValue(Event(SearchScreenState.Error))
-                }
-            })
-        }
+            }
     }
 
     fun loadHistory() {
-        val history = searchHistoryInteractor.getHistory()
-        _screenState.value = Event(
-            SearchScreenState.Content(
-                tracks = emptyList(),
-                history = history,
-                isHistoryVisible = true
+        viewModelScope.launch {
+            val history = searchHistoryInteractor.getHistory()
+            _screenState.postValue(
+                Event(
+                    SearchScreenState.Content(
+                        tracks = emptyList(),
+                        history = history,
+                        isHistoryVisible = true
+                    )
+                )
             )
-        )
+        }
     }
 
     fun addTrackToHistory(track: Track) {
-        searchHistoryInteractor.addTrack(track)
-        loadHistory()
+        viewModelScope.launch {
+            searchHistoryInteractor.addTrack(track)
+            loadHistory()
+        }
     }
 
     fun clearHistory() {
-        searchHistoryInteractor.clearHistory()
-        loadHistory()
+        viewModelScope.launch {
+            searchHistoryInteractor.clearHistory()
+            loadHistory()
+        }
     }
 
-    fun getLastSearchResults(): List<Track> {
-        return lastSearchResults
-    }
+    fun getLastSearchResults(): List<Track> = lastSearchResults
 
     fun setLastSearchResults(results: List<Track>) {
         lastSearchResults = results
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        executor.shutdown()
     }
 }
