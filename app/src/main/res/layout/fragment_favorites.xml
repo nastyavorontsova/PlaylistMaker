@@ -5,13 +5,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_marginTop="128dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="media.ui.FavoritesFragment">
+    tools:context="media.ui.FavoritesFragment"
+    >
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/trackFavoritesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20dp"/>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="170dp"
         android:layout_marginTop="82dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/emptyState"
+        android:visibility="gone">
 
         <ImageView
             android:layout_width="@dimen/placeholder_size"

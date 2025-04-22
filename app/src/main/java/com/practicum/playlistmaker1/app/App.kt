@@ -1,12 +1,12 @@
 package com.practicum.playlistmaker1.app
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.graphics.drawable.DrawableCompat.applyTheme
 import com.practicum.playlistmaker1.app.di.appModule
-import com.practicum.playlistmaker1.media.ui.mediaModule
+import com.practicum.playlistmaker1.media.di.dataModule
+import com.practicum.playlistmaker1.media.di.interactorMediaModule
+import com.practicum.playlistmaker1.media.di.repositoryMediaModule
+import com.practicum.playlistmaker1.media.di.mediaModule
 import com.practicum.playlistmaker1.player.di.audioPlayerModule
 import com.practicum.playlistmaker1.search.di.data.networkModule
 import com.practicum.playlistmaker1.search.di.data.repositoryModule
@@ -19,7 +19,6 @@ import com.practicum.playlistmaker1.sharing.di.sharingModule
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
-import org.koin.dsl.module
 
 class App : Application() {
 
@@ -46,7 +45,10 @@ class App : Application() {
                     sharingModule,
                     settingsViewModelModule,
                     searchViewModelModule,
-                    mediaModule
+                    mediaModule,
+                    dataModule,
+                    repositoryMediaModule,
+                    interactorMediaModule
                 )
             )
         }

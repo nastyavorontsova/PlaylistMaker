@@ -102,7 +102,7 @@
         android:layout_width="52dp"
         android:layout_height="52dp"
         android:background="?attr/selectableItemBackground"
-        android:src="@drawable/ic_heart"
+        android:src="@drawable/ic_favorite"
         app:layout_constraintTop_toTopOf="@id/playPauseButton"
         app:layout_constraintBottom_toBottomOf="@id/playPauseButton"
         app:layout_constraintEnd_toStartOf="@id/right_guideline"

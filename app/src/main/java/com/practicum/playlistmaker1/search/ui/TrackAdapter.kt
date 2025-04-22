@@ -1,33 +1,34 @@
 package com.practicum.playlistmaker1.search.ui
 
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker1.search.domain.models.Track
 
 class TrackAdapter(
-    private val tracks: MutableList<Track>,
     private val onTrackClick: (Track) -> Unit
-) : RecyclerView.Adapter<TrackViewHolder>() {
+) : ListAdapter<Track, TrackViewHolder>(TrackDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         return TrackViewHolder.create(parent)
     }
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
-        val track = tracks[position]
-        holder.bind(track)
-        holder.itemView.setOnClickListener {
-            onTrackClick(track)
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return tracks.size
+        holder.bind(getItem(position), onTrackClick)
     }
 
     fun updateData(newTracks: List<Track>) {
-        tracks.clear()
-        tracks.addAll(newTracks)
-        notifyDataSetChanged()
+        submitList(newTracks.toList())
+    }
+
+    class TrackDiffCallback : DiffUtil.ItemCallback<Track>() {
+        override fun areItemsTheSame(oldItem: Track, newItem: Track): Boolean {
+            return oldItem.trackId == newItem.trackId
+        }
+
+        override fun areContentsTheSame(oldItem: Track, newItem: Track): Boolean {
+            return oldItem == newItem
+        }
     }
 }

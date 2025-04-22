@@ -34,10 +34,12 @@ class SearchFragment : Fragment() {
 
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 1000L
+        fun newInstance() = SearchFragment()
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
@@ -47,11 +49,9 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Инициализация адаптеров
         initViews()
         initAdapters()
 
-        // Восстановление состояния
         if (savedInstanceState != null) {
             val searchQuery = savedInstanceState.getString("searchQuery", "")
             val searchResults = savedInstanceState.getParcelableArrayList<Track>("searchResults")
@@ -103,8 +103,6 @@ class SearchFragment : Fragment() {
         binding.inputEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus && binding.inputEditText.text.isNullOrEmpty()) {
                 viewModel.loadHistory()
-            } else {
-                observeViewModel()
             }
         }
     }
@@ -123,8 +121,6 @@ class SearchFragment : Fragment() {
             val lastResults = viewModel.getLastSearchResults()
             if (lastResults.isNotEmpty()) {
                 showContent(lastResults, emptyList(), isHistoryVisible = false)
-            } else {
-                observeViewModel()
             }
         }
     }
@@ -141,14 +137,14 @@ class SearchFragment : Fragment() {
     }
 
     private fun initAdapters() {
-        trackAdapter = TrackAdapter(mutableListOf()) { track ->
+        trackAdapter = TrackAdapter { track ->
             if (clickDebounce()) {
                 viewModel.addTrackToHistory(track)
                 navigateToPlayer(track)
             }
         }
 
-        historyAdapter = TrackAdapter(mutableListOf()) { track ->
+        historyAdapter = TrackAdapter { track ->
             if (clickDebounce()) {
                 viewModel.addTrackToHistory(track)
                 navigateToPlayer(track)

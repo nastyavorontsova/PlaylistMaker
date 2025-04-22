@@ -15,7 +15,8 @@ data class Track(
     val country: String,
     val trackTimeMillis: Long,
     val previewUrl: String,
-    val artworkUrl100: String
+    val artworkUrl100: String,
+    var isFavorite: Boolean = false
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -59,11 +60,13 @@ data class Track(
     }
 
     fun getFormattedDuration(): String {
-        return SimpleDateFormat("mm:ss", Locale.getDefault()).format(trackTimeMillis)
+        val minutes = (trackTimeMillis / 1000) / 60
+        val seconds = (trackTimeMillis / 1000) % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 
     fun getCoverArtwork(): String {
-        return artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
+        return artworkUrl100.replace("100x100bb", "500x500bb")
     }
 }
 
