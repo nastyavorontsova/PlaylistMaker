@@ -12,12 +12,12 @@ import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.search.domain.models.Track
 
 class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private var trackNameTextView: TextView = itemView.findViewById(R.id.trackNameTextView)
-    private var artistNameTextView: TextView = itemView.findViewById(R.id.artistNameTextView)
-    private var trackTimeTextView: TextView = itemView.findViewById(R.id.trackTimeTextView)
-    private var artworkImageView: ImageView = itemView.findViewById(R.id.artworkImageView)
+    private val trackNameTextView: TextView = itemView.findViewById(R.id.trackNameTextView)
+    private val artistNameTextView: TextView = itemView.findViewById(R.id.artistNameTextView)
+    private val trackTimeTextView: TextView = itemView.findViewById(R.id.trackTimeTextView)
+    private val artworkImageView: ImageView = itemView.findViewById(R.id.artworkImageView)
 
-    fun bind(track: Track) {
+    fun bind(track: Track, onClick: (Track) -> Unit) {
         trackNameTextView.text = track.trackName
         artistNameTextView.text = track.artistName
         trackTimeTextView.text = track.getFormattedDuration()
@@ -32,12 +32,14 @@ class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             .fitCenter()
             .transform(RoundedCorners(cornerRadius))
             .into(artworkImageView)
+
+        itemView.setOnClickListener { onClick(track) }
     }
 
     companion object {
         fun create(parent: ViewGroup): TrackViewHolder {
-            val view =
-                LayoutInflater.from(parent.context).inflate(R.layout.item_track, parent, false)
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_track, parent, false)
             return TrackViewHolder(view)
         }
     }

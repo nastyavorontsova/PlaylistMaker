@@ -10,5 +10,6 @@ data class TrackDto(
     val country: String,
     val trackTimeMillis: Long,
     val previewUrl: String,
-    val artworkUrl100: String
+    val artworkUrl100: String,
+    var isFavorite: Boolean = false
 )

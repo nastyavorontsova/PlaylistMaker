@@ -4,38 +4,52 @@
     android:id="@+id/navigation_graph"
     app:startDestination="@id/mediaLibraryFragment">
 
+    <!-- Основные фрагменты -->
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.practicum.playlistmaker1.search.ui.SearchFragment"
-        android:label="SearchFragment" >
+        android:label="SearchFragment">
         <action
             android:id="@+id/action_searchFragment_to_audioPlayerActivity"
             app:destination="@id/audioPlayerActivity" />
     </fragment>
+
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.practicum.playlistmaker1.settings.ui.SettingsFragment"
         android:label="SettingsFragment" />
+
+    <!-- Главный хост для медиа-вкладок -->
     <fragment
         android:id="@+id/mediaLibraryFragment"
         android:name="com.practicum.playlistmaker1.media.ui.MediaLibraryFragment"
-        android:label="MediaLibraryFragment" />
-    <fragment
-        android:id="@+id/favoritesFragment"
-        android:name="com.practicum.playlistmaker1.media.ui.FavoritesFragment"
-        android:label="FavoritesFragment" >
-        <action
-            android:id="@+id/action_favoritesFragment_to_audioPlayerActivity"
-            app:destination="@id/audioPlayerActivity" />
+        android:label="MediaLibraryFragment">
+
+        <!-- Вложенный граф для вкладок -->
+        <navigation
+            android:id="@+id/media_tabs_navigation"
+            app:startDestination="@id/favoritesFragment">
+
+            <fragment
+                android:id="@+id/favoritesFragment"
+                android:name="com.practicum.playlistmaker1.media.ui.FavoritesFragment"
+                android:label="FavoritesFragment">
+                <action
+                    android:id="@+id/action_favoritesFragment_to_audioPlayerActivity"
+                    app:destination="@id/audioPlayerActivity" />
+            </fragment>
+
+            <fragment
+                android:id="@+id/playlistsFragment"
+                android:name="com.practicum.playlistmaker1.media.ui.PlaylistsFragment"
+                android:label="PlaylistsFragment">
+                <action
+                    android:id="@+id/action_playlistsFragment_to_audioPlayerActivity"
+                    app:destination="@id/audioPlayerActivity" />
+            </fragment>
+        </navigation>
     </fragment>
-    <fragment
-        android:id="@+id/playlistsFragment"
-        android:name="com.practicum.playlistmaker1.media.ui.PlaylistsFragment"
-        android:label="PlaylistsFragment" >
-        <action
-            android:id="@+id/action_playlistsFragment_to_audioPlayerActivity"
-            app:destination="@id/audioPlayerActivity" />
-    </fragment>
+
     <activity
         android:id="@+id/audioPlayerActivity"
         android:name="com.practicum.playlistmaker1.player.ui.AudioPlayerActivity"

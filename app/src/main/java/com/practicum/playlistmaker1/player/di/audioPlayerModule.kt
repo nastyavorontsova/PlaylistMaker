@@ -6,6 +6,5 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val audioPlayerModule = module {
-    single { MediaPlayer() } // MediaPlayer как зависимость
-    viewModel { AudioPlayerViewModel(get()) } // ViewModel
+    viewModel { AudioPlayerViewModel(get()) }
 }

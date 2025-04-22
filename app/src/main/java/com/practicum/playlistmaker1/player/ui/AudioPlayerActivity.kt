@@ -65,17 +65,26 @@ class AudioPlayerActivity : AppCompatActivity() {
         setupPlayPauseButton()
         setupBackButton()
 
-        viewModel.playerState.observe(this, { state ->
+        viewModel.playerState.observe(this) { state ->
             when (state) {
-                AudioPlayerViewModel.PlayerState.PLAYING -> playPauseButton.setImageResource(R.drawable.ic_pause)
-                AudioPlayerViewModel.PlayerState.PAUSED, AudioPlayerViewModel.PlayerState.PREPARED -> playPauseButton.setImageResource(R.drawable.ic_play)
-                else -> {}
+                AudioPlayerViewModel.PlayerState.PLAYING -> {
+                    playPauseButton.setImageResource(R.drawable.ic_pause)
+                }
+                AudioPlayerViewModel.PlayerState.PAUSED -> {
+                    playPauseButton.setImageResource(R.drawable.ic_play)
+                }
+                AudioPlayerViewModel.PlayerState.PREPARED -> {
+                    playPauseButton.setImageResource(R.drawable.ic_play)
+                }
+                AudioPlayerViewModel.PlayerState.DEFAULT -> {
+                    playPauseButton.setImageResource(R.drawable.ic_play)
+                }
             }
-        })
+        }
 
-        viewModel.progress.observe(this, { progress ->
-            progressTextView.text = progress
-        })
+        viewModel.progress.observe(this) { progress ->
+            findViewById<TextView>(R.id.progress).text = progress
+        }
     }
 
     private fun setupUI() {
@@ -94,6 +103,16 @@ class AudioPlayerActivity : AppCompatActivity() {
             .placeholder(R.drawable.placeholder_cover)
             .transform(RoundedCorners(cornerRadius))
             .into(coverArt)
+
+        addToFavoritesButton.setOnClickListener {
+            viewModel.onFavoriteClicked()
+        }
+
+        // Подписка на изменения isFavorite
+        viewModel.isFavorite.observe(this) { isFavorite ->
+            val iconRes = if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite
+            addToFavoritesButton.setImageResource(iconRes)
+        }
     }
 
     private fun formatTrackDuration(duration: Long): String {
@@ -124,6 +143,6 @@ class AudioPlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.releaseMediaPlayer() // Освобождаем MediaPlayer при уничтожении Activity
+        viewModel.releaseMediaPlayer()
     }
 }
