@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorOnSecondary"
+    android:background="?attr/colorSecondary"
     android:orientation="vertical">
 
     <!-- Вёрстка экрана «Аудиоплеер» -->
@@ -18,7 +18,7 @@
             android:id="@+id/main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?attr/colorSecondaryVariant"
+            android:background="?attr/colorSecondary"
             tools:context=".player.ui.AudioPlayerFragment">
 
             <androidx.constraintlayout.widget.Guideline

@@ -39,7 +39,6 @@ class SearchFragment : Fragment() {
     private var debounceJob: Job? = null
 
     companion object {
-        private const val CLICK_DEBOUNCE_DELAY = 1000L
         fun newInstance() = SearchFragment()
     }
 
@@ -59,17 +58,12 @@ class SearchFragment : Fragment() {
         initViews()
         initAdapters()
 
-        if (savedInstanceState != null) {
-            val searchQuery = savedInstanceState.getString("searchQuery", "")
-            val searchResults = savedInstanceState.getParcelableArrayList<Track>("searchResults")
+        val lastResults = viewModel.getLastSearchResults()
+        val lastQuery = viewModel.getLastSearchQuery()
 
-            if (!searchQuery.isNullOrEmpty() && searchResults != null) {
-                binding.inputEditText.setText(searchQuery)
-                viewModel.setLastSearchResults(searchResults)
-                showContent(searchResults, emptyList(), isHistoryVisible = false)
-            } else {
-                viewModel.loadHistory()
-            }
+        if (lastResults.isNotEmpty() && lastQuery.isNotEmpty()) {
+            binding.inputEditText.setText(lastQuery)
+            showContent(lastResults, emptyList(), isHistoryVisible = false)
         } else {
             viewModel.loadHistory()
         }
@@ -122,13 +116,20 @@ class SearchFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (binding.inputEditText.text.isNullOrEmpty() && binding.inputEditText.hasFocus()) {
-            viewModel.loadHistory()
+
+        isClickAllowed = true
+        debounceJob?.cancel()
+        debounceJob = null
+
+        val lastQuery = viewModel.getLastSearchQuery()
+        val lastResults = viewModel.getLastSearchResults()
+
+        if (lastQuery.isNotEmpty() && lastResults.isNotEmpty()) {
+            // Явно показываем последний результат
+            binding.inputEditText.setText(lastQuery)
+            showContent(lastResults, emptyList(), isHistoryVisible = false)
         } else {
-            val lastResults = viewModel.getLastSearchResults()
-            if (lastResults.isNotEmpty()) {
-                showContent(lastResults, emptyList(), isHistoryVisible = false)
-            }
+            viewModel.loadHistory()
         }
     }
 
@@ -145,16 +146,20 @@ class SearchFragment : Fragment() {
 
     private fun initAdapters() {
         trackAdapter = TrackAdapter { track ->
-            if (clickDebounce()) {
-                viewModel.addTrackToHistory(track)
-                navigateToPlayer(track)
+            lifecycleScope.launch {
+                if (viewModel.clickDebounce()) {
+                    viewModel.addTrackToHistory(track)
+                    navigateToPlayer(track)
+                }
             }
         }
 
         historyAdapter = TrackAdapter { track ->
-            if (clickDebounce()) {
-                viewModel.addTrackToHistory(track)
-                navigateToPlayer(track)
+            lifecycleScope.launch {
+                if (viewModel.clickDebounce()) {
+                    viewModel.addTrackToHistory(track)
+                    navigateToPlayer(track)
+                }
             }
         }
 
@@ -244,19 +249,6 @@ class SearchFragment : Fragment() {
     private fun hideKeyboard(view: View) {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
-    }
-
-    private fun clickDebounce(): Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            debounceJob?.cancel()
-            debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-                delay(CLICK_DEBOUNCE_DELAY)
-                isClickAllowed = true
-            }
-        }
-        return current
     }
 
     private fun Fragment.setKeyboardAdjustMode(mode: Int) {

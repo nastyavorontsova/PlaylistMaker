@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/track_height"
-    android:background="?attr/colorSecondaryVariant"
+    android:background="?attr/colorSecondary"
     android:orientation="horizontal"
     android:paddingHorizontal="@dimen/track_padding_horizontal"
     android:paddingVertical="@dimen/track_padding_vertical">

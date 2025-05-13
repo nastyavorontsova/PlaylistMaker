@@ -27,7 +27,11 @@ class SearchViewModel(
     private var lastSearchQuery: String? = null
     private var searchJob: Job? = null
 
+    private var isClickAllowed = true
+    private var debounceJob: Job? = null
+
     companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
     }
 
@@ -121,5 +125,20 @@ class SearchViewModel(
 
     fun setLastSearchResults(results: List<Track>) {
         lastSearchResults = results
+    }
+
+    fun getLastSearchQuery(): String = lastSearchQuery ?: ""
+
+    suspend fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            debounceJob?.cancel()
+            debounceJob = viewModelScope.launch {
+                delay(CLICK_DEBOUNCE_DELAY)
+                isClickAllowed = true
+            }
+        }
+        return current
     }
 }

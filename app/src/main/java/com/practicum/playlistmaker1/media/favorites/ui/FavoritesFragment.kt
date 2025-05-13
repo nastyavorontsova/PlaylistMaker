@@ -63,7 +63,7 @@ class FavoritesFragment : Fragment() {
 
     private fun initAdapter() {
         adapter = TrackAdapter { track ->
-            if (clickDebounce()) {
+            if (viewModel.canClick()) {
                 navigateToPlayer(track)
             }
         }
@@ -96,17 +96,12 @@ class FavoritesFragment : Fragment() {
         findNavController().navigate(R.id.action_mediaLibraryFragment_to_audioPlayerFragment, bundle)
     }
 
-    private fun clickDebounce(): Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            debounceJob?.cancel()
-            debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-                delay(CLICK_DEBOUNCE_DELAY)
-                isClickAllowed = true
-            }
-        }
-        return current
+    override fun onResume() {
+        super.onResume()
+
+        isClickAllowed = true
+        debounceJob?.cancel()
+        debounceJob = null
     }
 
     override fun onDestroyView() {

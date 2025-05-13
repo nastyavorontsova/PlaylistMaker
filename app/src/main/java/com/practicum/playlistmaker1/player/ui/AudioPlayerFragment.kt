@@ -178,7 +178,6 @@ class AudioPlayerFragment : Fragment() {
     private fun setupPlaylistsRecyclerView() {
         adapter = PlaylistBottomSheetAdapter { playlist ->
             viewModel.addTrackToPlaylist(playlist)
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
         binding.playlistsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -197,7 +196,10 @@ class AudioPlayerFragment : Fragment() {
                         "Добавлено в плейлист ${status.playlistName}",
                         Toast.LENGTH_SHORT
                     ).show()
+
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
                 }
+
                 is AudioPlayerViewModel.AddToPlaylistStatus.AlreadyExists -> {
                     Toast.makeText(
                         requireContext(),
@@ -205,6 +207,7 @@ class AudioPlayerFragment : Fragment() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+
                 else -> {}
             }
         }
