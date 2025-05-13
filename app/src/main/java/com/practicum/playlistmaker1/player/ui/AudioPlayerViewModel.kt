@@ -4,9 +4,12 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.practicum.playlistmaker1.media.domain.FavouriteTracksInteractor
+import com.practicum.playlistmaker1.media.favorites.domain.FavouriteTracksInteractor
+import com.practicum.playlistmaker1.media.playlist.data.db.dao.Playlist
+import com.practicum.playlistmaker1.media.playlist.domain.PlaylistsInteractor
 import com.practicum.playlistmaker1.search.domain.models.Track
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,7 +17,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class AudioPlayerViewModel(
-    private val interactor: FavouriteTracksInteractor
+    private val interactor: FavouriteTracksInteractor,
+    private val playlistsInteractor: PlaylistsInteractor,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private var mediaPlayer: MediaPlayer? = null
@@ -30,6 +35,18 @@ class AudioPlayerViewModel(
     private lateinit var track: Track
     private var progressUpdateJob: Job? = null
     private var isInitialized = false
+
+    private val _playlists = MutableLiveData<List<Playlist>>()
+    val playlists: LiveData<List<Playlist>> get() = _playlists
+
+    private val _addToPlaylistStatus = MutableLiveData<AddToPlaylistStatus>()
+    val addToPlaylistStatus: LiveData<AddToPlaylistStatus> get() = _addToPlaylistStatus
+
+    init {
+        savedStateHandle.get<Track>("TRACK_DATA")?.let { track ->
+            initialize(track)
+        }
+    }
 
     fun initialize(track: Track) {
         if (::track.isInitialized && this.track.trackId == track.trackId) return
@@ -49,19 +66,6 @@ class AudioPlayerViewModel(
         _playerState.value = PlayerState.DEFAULT
         _progress.value = "00:00"
         initMediaPlayer()
-    }
-
-    fun onFavoriteClicked() {
-        viewModelScope.launch {
-            val currentlyFavorite = _isFavorite.value == true
-            if (currentlyFavorite) {
-                interactor.removeFromFavourites(track)
-            } else {
-                interactor.addToFavourites(track)
-            }
-            _isFavorite.postValue(!currentlyFavorite)
-            track.isFavorite = !currentlyFavorite
-        }
     }
 
     private fun initMediaPlayer() {
@@ -141,10 +145,34 @@ class AudioPlayerViewModel(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        mediaPlayer?.release()
-        progressUpdateJob?.cancel()
+    fun onFavoriteClicked() {
+        viewModelScope.launch {
+            val currentlyFavorite = _isFavorite.value == true
+            if (currentlyFavorite) {
+                interactor.removeFromFavourites(track)
+            } else {
+                interactor.addToFavourites(track)
+            }
+            _isFavorite.postValue(!currentlyFavorite)
+            track.isFavorite = !currentlyFavorite
+        }
+    }
+
+    fun loadPlaylists() {
+        viewModelScope.launch {
+            _playlists.value = playlistsInteractor.getAllPlaylists()
+        }
+    }
+
+    fun addTrackToPlaylist(playlist: Playlist) {
+        viewModelScope.launch {
+            if (playlist.trackIds.contains(track.trackId)) {
+                _addToPlaylistStatus.value = AddToPlaylistStatus.AlreadyExists(playlist.name)
+            } else {
+                playlistsInteractor.addTrackToPlaylist(track, playlist)
+                _addToPlaylistStatus.value = AddToPlaylistStatus.Success(playlist.name)
+            }
+        }
     }
 
     fun releaseMediaPlayer() {
@@ -152,7 +180,17 @@ class AudioPlayerViewModel(
         progressUpdateJob?.cancel()
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        releaseMediaPlayer()
+    }
+
     enum class PlayerState {
         DEFAULT, PREPARED, PLAYING, PAUSED
+    }
+
+    sealed class AddToPlaylistStatus {
+        data class Success(val playlistName: String) : AddToPlaylistStatus()
+        data class AlreadyExists(val playlistName: String) : AddToPlaylistStatus()
     }
 }

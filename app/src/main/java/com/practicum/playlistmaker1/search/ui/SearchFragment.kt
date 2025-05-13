@@ -1,19 +1,25 @@
 package com.practicum.playlistmaker1.search.ui
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
+import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.databinding.FragmentSearchBinding
-import com.practicum.playlistmaker1.player.ui.AudioPlayerActivity
+import com.practicum.playlistmaker1.player.ui.AudioPlayerFragment
 import com.practicum.playlistmaker1.search.domain.models.Track
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -48,6 +54,7 @@ class SearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setKeyboardAdjustMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 
         initViews()
         initAdapters()
@@ -230,9 +237,8 @@ class SearchFragment : Fragment() {
     }
 
     private fun navigateToPlayer(track: Track) {
-        val intent = Intent(requireContext(), AudioPlayerActivity::class.java)
-        intent.putExtra("TRACK_DATA", track)
-        startActivity(intent)
+        val bundle = bundleOf("TRACK_DATA" to track.copy())
+        findNavController().navigate(R.id.action_searchFragment_to_audioPlayerFragment, bundle)
     }
 
     private fun hideKeyboard(view: View) {
@@ -252,4 +258,9 @@ class SearchFragment : Fragment() {
         }
         return current
     }
+
+    private fun Fragment.setKeyboardAdjustMode(mode: Int) {
+        activity?.window?.setSoftInputMode(mode)
+    }
 }
+

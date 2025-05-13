@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Цвет когда поле в фокусе -->
+    <item android:color="@color/light_blue" android:state_focused="true"/>
+    <!-- Цвет когда поле содержит текст -->
+    <item android:color="@color/light_blue" android:state_activated="true"/>
+    <!-- Дефолтный цвет из темы -->
+    <item android:color="?attr/colorPrimaryVariant" android:alpha="0.6"/>
+</selector>

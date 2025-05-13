@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp") version "1.9.0-1.0.13"
+    id("kotlin-parcelize")
+    id("androidx.navigation.safeargs.kotlin")
 }
 
 android {
@@ -37,6 +39,9 @@ android {
     viewBinding {
         enable = true
     }
+    dataBinding {
+        enable = true
+    }
 }
 
 dependencies {
@@ -61,10 +66,12 @@ dependencies {
     implementation("io.insert-koin:koin-android:3.3.0")
     implementation ("androidx.viewpager2:viewpager2:1.0.0")
     implementation ("androidx.fragment:fragment-ktx:1.5.5")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
-    implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
     implementation("androidx.fragment:fragment-ktx:1.5.6")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation("com.caverock:androidsvg:1.4")
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
 
     val room_version = "2.5.1"
     implementation("androidx.room:room-runtime:$room_version")

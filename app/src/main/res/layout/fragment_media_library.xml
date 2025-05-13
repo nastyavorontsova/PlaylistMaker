@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="media.ui.MediaLibraryFragment">
+    tools:context=".media.favorites.ui.MediaLibraryFragment">
 
     <LinearLayout
         style="@style/SecondaryLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        android:orientation="vertical">
 
+        <!-- Шапка с заголовком -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/header_height"
@@ -35,11 +34,13 @@
                 android:textSize="@dimen/header_size" />
         </LinearLayout>
 
+        <!-- Контейнер для вкладок -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <!-- TabLayout -->
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
@@ -56,14 +57,15 @@
                 app:elevation="0dp"
                 android:background="?attr/colorSecondary"/>
 
-            <androidx.viewpager.widget.ViewPager
+            <!-- ViewPager2 -->
+            <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/viewPager"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                app:layout_constraintTop_toBottomOf="@id/tabLayout"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
         </LinearLayout>
-
-
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

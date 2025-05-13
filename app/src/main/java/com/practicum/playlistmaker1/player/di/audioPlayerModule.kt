@@ -6,5 +6,11 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val audioPlayerModule = module {
-    viewModel { AudioPlayerViewModel(get()) }
+    viewModel { params ->
+        AudioPlayerViewModel(
+            interactor = get(),
+            playlistsInteractor = get(),
+            savedStateHandle = get()
+        )
+    }
 }

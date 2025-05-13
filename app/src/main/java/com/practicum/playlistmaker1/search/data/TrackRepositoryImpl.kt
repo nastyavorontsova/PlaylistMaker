@@ -1,7 +1,7 @@
 package com.practicum.playlistmaker1.search.data
 
-import com.practicum.playlistmaker1.media.data.db.TrackDbConvertor
-import com.practicum.playlistmaker1.media.data.db.dao.FavouriteTracksDao
+import com.practicum.playlistmaker1.media.favorites.data.db.TrackDbConvertor
+import com.practicum.playlistmaker1.media.favorites.data.db.dao.FavouriteTracksDao
 import com.practicum.playlistmaker1.search.data.dto.NetworkResult
 import com.practicum.playlistmaker1.search.data.dto.TrackDto
 import com.practicum.playlistmaker1.search.data.dto.TrackSearchRequest

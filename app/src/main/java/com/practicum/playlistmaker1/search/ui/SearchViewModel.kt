@@ -115,7 +115,9 @@ class SearchViewModel(
         }
     }
 
-    fun getLastSearchResults(): List<Track> = lastSearchResults
+    fun getLastSearchResults(): List<Track> {
+        return lastSearchResults
+    }
 
     fun setLastSearchResults(results: List<Track>) {
         lastSearchResults = results

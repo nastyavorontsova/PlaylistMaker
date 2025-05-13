@@ -43,4 +43,16 @@
         <item name="itemRippleColor">@null</item>
     </style>
 
+    <style name="RoundedTextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
+        <item name="boxStrokeColor">@drawable/text_input_stroke_color</item>
+        <item name="hintTextColor">@drawable/text_input_hint_color</item>
+        <item name="hintAnimationEnabled">true</item>
+        <item name="hintEnabled">true</item>
+    </style>
+
+    @drawable/text_input_stroke_color
 </resources>
