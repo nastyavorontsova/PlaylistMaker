@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.databinding.ItemBsPlaylistBinding
 import com.practicum.playlistmaker1.media.playlist.data.db.dao.Playlist
@@ -35,13 +37,18 @@ class PlaylistBottomSheetAdapter(
 
         fun bind(playlist: Playlist) {
             with(binding) {
-                // Загрузка обложки плейлиста
+                val radius = root.context.resources.getDimensionPixelSize(R.dimen.button_radius)
+
                 if (playlist.coverPath != null) {
                     Glide.with(root.context)
                         .load(File(playlist.coverPath))
+                        .transform(CenterCrop(), RoundedCorners(radius))
                         .into(coverPath)
                 } else {
-                    coverPath.setImageResource(R.drawable.placeholder_cover)
+                    Glide.with(root.context)
+                        .load(R.drawable.placeholder_cover)
+                        .transform(CenterCrop(), RoundedCorners(radius))
+                        .into(coverPath)
                 }
 
                 name.text = playlist.name
