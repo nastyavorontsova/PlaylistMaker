@@ -2,6 +2,7 @@ package com.practicum.playlistmaker1.media.playlist.ui
 
 import android.app.AlertDialog
 import android.content.res.ColorStateList
+import android.graphics.Outline
 import android.graphics.drawable.PictureDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -12,6 +13,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -20,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.caverock.androidsvg.SVG
 import com.google.android.material.textfield.TextInputLayout
 import com.practicum.playlistmaker1.R
@@ -68,7 +71,23 @@ class PlaylistFragment : Fragment() {
 
             binding.svgImageView.apply {
                 setImageDrawable(PictureDrawable(picture))
-                scaleType = ImageView.ScaleType.FIT_CENTER
+                scaleType = ImageView.ScaleType.CENTER_CROP
+
+                // Делаем обрезку углов
+                clipToOutline = true
+                outlineProvider = object : ViewOutlineProvider() {
+                    override fun getOutline(view: View, outline: Outline) {
+                        val radius = TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP,
+                            8f,
+                            resources.displayMetrics
+                        )
+                        outline.setRoundRect(0, 0, view.width, view.height, radius)
+                    }
+                }
+
+                // Убедимся, что обрезка применяется, когда view уже имеет размеры
+                post { invalidateOutline() }
             }
 
             inputStream.close()

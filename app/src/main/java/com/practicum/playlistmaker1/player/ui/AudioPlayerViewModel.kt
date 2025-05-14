@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.playlistmaker1.app.Event
 import com.practicum.playlistmaker1.media.favorites.domain.FavouriteTracksInteractor
 import com.practicum.playlistmaker1.media.playlist.data.db.dao.Playlist
 import com.practicum.playlistmaker1.media.playlist.domain.PlaylistsInteractor
@@ -39,8 +40,9 @@ class AudioPlayerViewModel(
     private val _playlists = MutableLiveData<List<Playlist>>()
     val playlists: LiveData<List<Playlist>> get() = _playlists
 
-    private val _addToPlaylistStatus = MutableLiveData<AddToPlaylistStatus>()
-    val addToPlaylistStatus: LiveData<AddToPlaylistStatus> get() = _addToPlaylistStatus
+    private val _addToPlaylistStatus = MutableLiveData<Event<AddToPlaylistStatus>>()
+    val addToPlaylistStatus: LiveData<Event<AddToPlaylistStatus>> get() = _addToPlaylistStatus
+
 
     init {
         savedStateHandle.get<Track>("TRACK_DATA")?.let { track ->
@@ -167,10 +169,10 @@ class AudioPlayerViewModel(
     fun addTrackToPlaylist(playlist: Playlist) {
         viewModelScope.launch {
             if (playlist.trackIds.contains(track.trackId)) {
-                _addToPlaylistStatus.value = AddToPlaylistStatus.AlreadyExists(playlist.name)
+                _addToPlaylistStatus.value = Event(AddToPlaylistStatus.AlreadyExists(playlist.name))
             } else {
                 playlistsInteractor.addTrackToPlaylist(track, playlist)
-                _addToPlaylistStatus.value = AddToPlaylistStatus.Success(playlist.name)
+                _addToPlaylistStatus.value = Event(AddToPlaylistStatus.Success(playlist.name))
             }
         }
     }

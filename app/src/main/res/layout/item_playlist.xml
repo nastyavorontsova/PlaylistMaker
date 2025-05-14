@@ -4,23 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="3dp"
     android:background="@null"
-    card_view:cardElevation="5dp">
+    android:paddingStart="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSecondary"
         android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        android:layout_marginHorizontal="16dp">
-        
+        android:layout_marginTop="16dp">
+
         <ImageView
             android:id="@+id/coverPath"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:background="@drawable/empty_rectangle"/>
+            android:layout_width="165dp"
+            android:layout_height="165dp"
+            android:scaleType="centerCrop"/>
 
         <TextView
             android:id="@+id/name"

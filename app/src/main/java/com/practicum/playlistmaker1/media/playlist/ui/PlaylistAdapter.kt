@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.databinding.ItemPlaylistBinding
 import com.practicum.playlistmaker1.media.playlist.data.db.dao.Playlist
@@ -35,21 +37,24 @@ class PlaylistAdapter(
 
         fun bind(playlist: Playlist) {
             with(binding) {
-                // Простая загрузка обложки без анимаций
+                val radius = root.context.resources.getDimensionPixelSize(R.dimen.cover_art_radius)
+
                 if (playlist.coverPath != null) {
                     Glide.with(root.context)
                         .load(File(playlist.coverPath))
+                        .transform(CenterCrop(),RoundedCorners(radius))
                         .into(coverPath)
                 } else {
                     coverPath.setImageResource(R.drawable.placeholder_cover)
                 }
 
                 name.text = playlist.name
-                tracksCount.text = "${playlist.tracksCount} треков" // Упрощенный формат
+                tracksCount.text = "${playlist.tracksCount} треков"
 
                 root.setOnClickListener { onItemClick(playlist) }
             }
         }
+
     }
 
     class PlaylistDiffCallback : DiffUtil.ItemCallback<Playlist>() {

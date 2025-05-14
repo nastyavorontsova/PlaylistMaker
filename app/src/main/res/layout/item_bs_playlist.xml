@@ -6,7 +6,7 @@
     android:layout_height="@dimen/track_height"
     android:background="?attr/colorSecondary"
     android:orientation="horizontal"
-    android:paddingHorizontal="@dimen/track_padding_horizontal"
+    android:paddingEnd="@dimen/track_padding_horizontal"
     android:paddingVertical="@dimen/track_padding_vertical">
 
     <LinearLayout
@@ -20,8 +20,7 @@
             android:layout_height="@dimen/track_image"
             android:layout_gravity="start|center_vertical"
             android:layout_marginEnd="@dimen/margin_end_from_icon"
-            android:background="?attr/colorSecondary"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"/>
 
         <LinearLayout
             android:layout_width="0dp"

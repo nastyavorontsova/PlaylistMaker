@@ -188,27 +188,28 @@ class AudioPlayerFragment : Fragment() {
             binding.playlistsRecyclerView.visibility = if (playlists.isEmpty()) View.GONE else View.VISIBLE
         }
 
-        viewModel.addToPlaylistStatus.observe(viewLifecycleOwner) { status ->
-            when (status) {
-                is AudioPlayerViewModel.AddToPlaylistStatus.Success -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "Добавлено в плейлист ${status.playlistName}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+        viewModel.addToPlaylistStatus.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { status ->
+                when (status) {
+                    is AudioPlayerViewModel.AddToPlaylistStatus.Success -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Добавлено в плейлист ${status.playlistName}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    }
 
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                    is AudioPlayerViewModel.AddToPlaylistStatus.AlreadyExists -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Трек уже добавлен в плейлист ${status.playlistName}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    else -> {}
                 }
-
-                is AudioPlayerViewModel.AddToPlaylistStatus.AlreadyExists -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "Трек уже добавлен в плейлист ${status.playlistName}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                else -> {}
             }
         }
     }

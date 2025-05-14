@@ -54,5 +54,8 @@
         <item name="hintEnabled">true</item>
     </style>
 
-    @drawable/text_input_stroke_color
+    <style name="RoundedImageViewStyle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
 </resources>

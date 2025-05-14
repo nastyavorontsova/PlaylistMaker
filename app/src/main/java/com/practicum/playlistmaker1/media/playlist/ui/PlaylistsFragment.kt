@@ -52,11 +52,13 @@ class PlaylistsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        val spacing = 2.dpToPx()
         adapter = PlaylistAdapter { /* обработка клика */ }
 
         binding.playlistsRecyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
             adapter = this@PlaylistsFragment.adapter
+            addItemDecoration(GridSpacingItemDecoration(2, 0, includeEdge = false))
         }
     }
 
