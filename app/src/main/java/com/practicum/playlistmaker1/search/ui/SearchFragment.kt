@@ -1,19 +1,25 @@
 package com.practicum.playlistmaker1.search.ui
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
+import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.databinding.FragmentSearchBinding
-import com.practicum.playlistmaker1.player.ui.AudioPlayerActivity
+import com.practicum.playlistmaker1.player.ui.AudioPlayerFragment
 import com.practicum.playlistmaker1.search.domain.models.Track
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,7 +39,6 @@ class SearchFragment : Fragment() {
     private var debounceJob: Job? = null
 
     companion object {
-        private const val CLICK_DEBOUNCE_DELAY = 1000L
         fun newInstance() = SearchFragment()
     }
 
@@ -48,21 +53,17 @@ class SearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setKeyboardAdjustMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 
         initViews()
         initAdapters()
 
-        if (savedInstanceState != null) {
-            val searchQuery = savedInstanceState.getString("searchQuery", "")
-            val searchResults = savedInstanceState.getParcelableArrayList<Track>("searchResults")
+        val lastResults = viewModel.getLastSearchResults()
+        val lastQuery = viewModel.getLastSearchQuery()
 
-            if (!searchQuery.isNullOrEmpty() && searchResults != null) {
-                binding.inputEditText.setText(searchQuery)
-                viewModel.setLastSearchResults(searchResults)
-                showContent(searchResults, emptyList(), isHistoryVisible = false)
-            } else {
-                viewModel.loadHistory()
-            }
+        if (lastResults.isNotEmpty() && lastQuery.isNotEmpty()) {
+            binding.inputEditText.setText(lastQuery)
+            showContent(lastResults, emptyList(), isHistoryVisible = false)
         } else {
             viewModel.loadHistory()
         }
@@ -115,13 +116,20 @@ class SearchFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (binding.inputEditText.text.isNullOrEmpty() && binding.inputEditText.hasFocus()) {
-            viewModel.loadHistory()
+
+        isClickAllowed = true
+        debounceJob?.cancel()
+        debounceJob = null
+
+        val lastQuery = viewModel.getLastSearchQuery()
+        val lastResults = viewModel.getLastSearchResults()
+
+        if (lastQuery.isNotEmpty() && lastResults.isNotEmpty()) {
+            // Явно показываем последний результат
+            binding.inputEditText.setText(lastQuery)
+            showContent(lastResults, emptyList(), isHistoryVisible = false)
         } else {
-            val lastResults = viewModel.getLastSearchResults()
-            if (lastResults.isNotEmpty()) {
-                showContent(lastResults, emptyList(), isHistoryVisible = false)
-            }
+            viewModel.loadHistory()
         }
     }
 
@@ -138,16 +146,20 @@ class SearchFragment : Fragment() {
 
     private fun initAdapters() {
         trackAdapter = TrackAdapter { track ->
-            if (clickDebounce()) {
-                viewModel.addTrackToHistory(track)
-                navigateToPlayer(track)
+            lifecycleScope.launch {
+                if (viewModel.clickDebounce()) {
+                    viewModel.addTrackToHistory(track)
+                    navigateToPlayer(track)
+                }
             }
         }
 
         historyAdapter = TrackAdapter { track ->
-            if (clickDebounce()) {
-                viewModel.addTrackToHistory(track)
-                navigateToPlayer(track)
+            lifecycleScope.launch {
+                if (viewModel.clickDebounce()) {
+                    viewModel.addTrackToHistory(track)
+                    navigateToPlayer(track)
+                }
             }
         }
 
@@ -230,9 +242,8 @@ class SearchFragment : Fragment() {
     }
 
     private fun navigateToPlayer(track: Track) {
-        val intent = Intent(requireContext(), AudioPlayerActivity::class.java)
-        intent.putExtra("TRACK_DATA", track)
-        startActivity(intent)
+        val bundle = bundleOf("TRACK_DATA" to track.copy())
+        findNavController().navigate(R.id.action_searchFragment_to_audioPlayerFragment, bundle)
     }
 
     private fun hideKeyboard(view: View) {
@@ -240,16 +251,8 @@ class SearchFragment : Fragment() {
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private fun clickDebounce(): Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            debounceJob?.cancel()
-            debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-                delay(CLICK_DEBOUNCE_DELAY)
-                isClickAllowed = true
-            }
-        }
-        return current
+    private fun Fragment.setKeyboardAdjustMode(mode: Int) {
+        activity?.window?.setSoftInputMode(mode)
     }
 }
+

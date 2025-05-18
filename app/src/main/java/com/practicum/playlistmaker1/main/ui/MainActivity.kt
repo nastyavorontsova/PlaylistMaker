@@ -2,11 +2,14 @@ package com.practicum.playlistmaker1.main.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.databinding.ActivityMainBinding
+import com.practicum.playlistmaker1.player.ui.AudioPlayerFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,5 +26,20 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.playlistFragment, R.id.audioPlayerFragment -> {
+                    bottomNavigationView.visibility = View.GONE
+                }
+                else -> {
+                    bottomNavigationView.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    fun Fragment.setKeyboardAdjustMode(mode: Int) {
+        activity?.window?.setSoftInputMode(mode)
     }
 }

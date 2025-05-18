@@ -34,5 +34,6 @@
     <dimen name="section_margin">16dp</dimen>
     <dimen name="tab_text_size">14sp</dimen>
     <dimen name="bottom_navigation_text_size">12sp</dimen>
+    <dimen name="grid_spacing">8dp</dimen>
 
 </resources>

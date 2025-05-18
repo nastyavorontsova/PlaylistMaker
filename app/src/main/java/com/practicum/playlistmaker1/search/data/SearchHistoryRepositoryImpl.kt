@@ -2,8 +2,8 @@ package com.practicum.playlistmaker1.search.data
 
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.practicum.playlistmaker1.media.data.db.TrackDbConvertor
-import com.practicum.playlistmaker1.media.data.db.dao.FavouriteTracksDao
+import com.practicum.playlistmaker1.media.favorites.data.db.TrackDbConvertor
+import com.practicum.playlistmaker1.media.favorites.data.db.dao.FavouriteTracksDao
 import com.practicum.playlistmaker1.search.data.dto.TrackDto
 import com.practicum.playlistmaker1.search.domain.api.SearchHistoryRepository
 import com.practicum.playlistmaker1.search.domain.models.Track

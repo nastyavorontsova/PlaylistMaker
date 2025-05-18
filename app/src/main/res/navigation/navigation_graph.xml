@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_graph"
     app:startDestination="@id/mediaLibraryFragment">
+
+    <!-- Глобальные действия -->
+    <action
+        android:id="@+id/action_global_audioPlayerFragment"
+        app:destination="@id/audioPlayerFragment">
+        <argument
+            android:name="TRACK_DATA"
+            app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
+    </action>
+
+
+    <action
+        android:id="@+id/action_global_playlistFragment"
+        app:destination="@id/playlistFragment" />
 
     <!-- Основные фрагменты -->
     <fragment
@@ -10,8 +25,12 @@
         android:name="com.practicum.playlistmaker1.search.ui.SearchFragment"
         android:label="SearchFragment">
         <action
-            android:id="@+id/action_searchFragment_to_audioPlayerActivity"
-            app:destination="@id/audioPlayerActivity" />
+            android:id="@+id/action_searchFragment_to_audioPlayerFragment"
+            app:destination="@id/audioPlayerFragment">
+            <argument
+                android:name="TRACK_DATA"
+                app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
+        </action>
     </fragment>
 
     <fragment
@@ -19,39 +38,67 @@
         android:name="com.practicum.playlistmaker1.settings.ui.SettingsFragment"
         android:label="SettingsFragment" />
 
-    <!-- Главный хост для медиа-вкладок -->
     <fragment
         android:id="@+id/mediaLibraryFragment"
-        android:name="com.practicum.playlistmaker1.media.ui.MediaLibraryFragment"
-        android:label="MediaLibraryFragment">
+        android:name="com.practicum.playlistmaker1.media.favorites.ui.MediaLibraryFragment"
+        android:label="MediaLibraryFragment" />
 
-        <!-- Вложенный граф для вкладок -->
-        <navigation
-            android:id="@+id/media_tabs_navigation"
-            app:startDestination="@id/favoritesFragment">
+    <action
+        android:id="@+id/action_mediaLibraryFragment_to_audioPlayerFragment"
+        app:destination="@id/audioPlayerFragment">
+        <argument
+            android:name="TRACK_DATA"
+            app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
+    </action>
 
-            <fragment
-                android:id="@+id/favoritesFragment"
-                android:name="com.practicum.playlistmaker1.media.ui.FavoritesFragment"
-                android:label="FavoritesFragment">
-                <action
-                    android:id="@+id/action_favoritesFragment_to_audioPlayerActivity"
-                    app:destination="@id/audioPlayerActivity" />
-            </fragment>
-
-            <fragment
-                android:id="@+id/playlistsFragment"
-                android:name="com.practicum.playlistmaker1.media.ui.PlaylistsFragment"
-                android:label="PlaylistsFragment">
-                <action
-                    android:id="@+id/action_playlistsFragment_to_audioPlayerActivity"
-                    app:destination="@id/audioPlayerActivity" />
-            </fragment>
-        </navigation>
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.practicum.playlistmaker1.media.favorites.ui.FavoritesFragment"
+        android:label="FavoritesFragment">
+        <action
+            android:id="@+id/action_favoritesFragment_to_audioPlayerFragment"
+            app:destination="@id/audioPlayerFragment">
+            <argument
+                android:name="TRACK_DATA"
+                app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
+        </action>
     </fragment>
 
-    <activity
-        android:id="@+id/audioPlayerActivity"
-        android:name="com.practicum.playlistmaker1.player.ui.AudioPlayerActivity"
-        android:label="AudioPlayerActivity" />
+    <fragment
+        android:id="@+id/playlistsFragment"
+        android:name="com.practicum.playlistmaker1.media.playlist.ui.PlaylistsFragment"
+        android:label="PlaylistsFragment">
+        <action
+            android:id="@+id/action_playlistsFragment_to_audioPlayerFragment"
+            app:destination="@id/audioPlayerFragment">
+            <argument
+                android:name="TRACK_DATA"
+                app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
+        </action>
+        <action
+            android:id="@+id/action_playlistsFragment_to_playlistFragment"
+            app:destination="@id/playlistFragment" />
+    </fragment>
+
+    <!-- Фрагмент создания/редактирования плейлиста -->
+    <fragment
+        android:id="@+id/playlistFragment"
+        android:name="com.practicum.playlistmaker1.media.playlist.ui.PlaylistFragment"
+        android:label="PlaylistFragment">
+        <argument
+            android:name="playlistId"
+            android:defaultValue="-1L"
+            app:argType="long" />
+    </fragment>
+
+    <!-- Фрагмент плеера -->
+    <fragment
+        android:id="@+id/audioPlayerFragment"
+        android:name="com.practicum.playlistmaker1.player.ui.AudioPlayerFragment"
+        android:label="AudioPlayerFragment"
+        tools:layout="@layout/fragment_audio_player">
+        <argument
+            android:name="TRACK_DATA"
+            app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
+    </fragment>
 </navigation>

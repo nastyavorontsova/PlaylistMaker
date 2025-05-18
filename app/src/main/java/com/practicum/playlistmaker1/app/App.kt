@@ -3,10 +3,12 @@ package com.practicum.playlistmaker1.app
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import com.practicum.playlistmaker1.app.di.appModule
-import com.practicum.playlistmaker1.media.di.dataModule
-import com.practicum.playlistmaker1.media.di.interactorMediaModule
-import com.practicum.playlistmaker1.media.di.repositoryMediaModule
-import com.practicum.playlistmaker1.media.di.mediaModule
+import com.practicum.playlistmaker1.media.favorites.di.dataModule
+import com.practicum.playlistmaker1.media.favorites.di.interactorMediaModule
+import com.practicum.playlistmaker1.media.favorites.di.repositoryMediaModule
+import com.practicum.playlistmaker1.media.favorites.di.mediaModule
+import com.practicum.playlistmaker1.media.playlist.di.playlistModule
+import com.practicum.playlistmaker1.media.playlist.di.playlistViewModelModule
 import com.practicum.playlistmaker1.player.di.audioPlayerModule
 import com.practicum.playlistmaker1.search.di.data.networkModule
 import com.practicum.playlistmaker1.search.di.data.repositoryModule
@@ -48,7 +50,9 @@ class App : Application() {
                     mediaModule,
                     dataModule,
                     repositoryMediaModule,
-                    interactorMediaModule
+                    interactorMediaModule,
+                    playlistModule,
+                    playlistViewModelModule
                 )
             )
         }

@@ -1,21 +1,30 @@
-package com.practicum.playlistmaker1.media.ui
+package com.practicum.playlistmaker1.media.favorites.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.databinding.FragmentFavoritesBinding
-import com.practicum.playlistmaker1.player.ui.AudioPlayerActivity
+import com.practicum.playlistmaker1.player.ui.AudioPlayerFragment
 import com.practicum.playlistmaker1.search.domain.models.Track
+import com.practicum.playlistmaker1.search.ui.SearchFragmentDirections
 import com.practicum.playlistmaker1.search.ui.TrackAdapter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+
 
 class FavoritesFragment : Fragment() {
     private var _binding: FragmentFavoritesBinding? = null
@@ -54,7 +63,7 @@ class FavoritesFragment : Fragment() {
 
     private fun initAdapter() {
         adapter = TrackAdapter { track ->
-            if (clickDebounce()) {
+            if (viewModel.canClick()) {
                 navigateToPlayer(track)
             }
         }
@@ -81,24 +90,18 @@ class FavoritesFragment : Fragment() {
         binding.emptyState.visibility = View.VISIBLE
     }
 
+
     private fun navigateToPlayer(track: Track) {
-        val intent = Intent(requireActivity(), AudioPlayerActivity::class.java).apply {
-             putExtra("TRACK_DATA", track)
-         }
-         startActivity(intent)
+        val bundle = bundleOf("TRACK_DATA" to track.copy())
+        findNavController().navigate(R.id.action_mediaLibraryFragment_to_audioPlayerFragment, bundle)
     }
 
-    private fun clickDebounce(): Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            debounceJob?.cancel()
-            debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-                delay(CLICK_DEBOUNCE_DELAY)
-                isClickAllowed = true
-            }
-        }
-        return current
+    override fun onResume() {
+        super.onResume()
+
+        isClickAllowed = true
+        debounceJob?.cancel()
+        debounceJob = null
     }
 
     override fun onDestroyView() {
