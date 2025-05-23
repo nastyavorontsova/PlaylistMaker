@@ -58,4 +58,11 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
+
+    <style name="TextViewMenuStyle">
+        <item name="android:paddingVertical">@dimen/text_padding_vertical</item>
+        <item name="android:textColor">?attr/colorPrimaryVariant</item>
+        <item name="android:textSize">@dimen/menu_text_size</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+    </style>
 </resources>

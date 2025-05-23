@@ -20,4 +20,8 @@ interface PlaylistRepository {
     suspend fun deletePlaylist(playlistId: Long)
 
     suspend fun addTrackToPlaylist(track: Track, playlist: Playlist)
+
+    suspend fun getPlaylistWithTracks(playlistId: Long): Pair<Playlist, List<Track>>?
+
+    suspend fun removeTrackFromPlaylist(playlistId: Long, trackId: Long)
 }

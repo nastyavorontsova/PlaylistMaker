@@ -9,6 +9,7 @@ import com.practicum.playlistmaker1.media.playlist.data.db.dao.PlaylistDao
 import com.practicum.playlistmaker1.media.playlist.data.db.dao.PlaylistTracksDao
 import com.practicum.playlistmaker1.media.playlist.data.db.dao.toPlaylistTrackEntity
 import com.practicum.playlistmaker1.media.playlist.data.db.entity.PlaylistEntity
+import com.practicum.playlistmaker1.media.playlist.data.db.entity.PlaylistTrackEntity
 import com.practicum.playlistmaker1.media.playlist.domain.PlaylistRepository
 import com.practicum.playlistmaker1.search.domain.models.Track
 import kotlinx.coroutines.Dispatchers
@@ -62,12 +63,15 @@ class PlaylistRepositoryImpl(
     }
 
     override suspend fun deletePlaylist(playlistId: Long) {
-        playlistDao.getPlaylistById(playlistId)?.let { playlist ->
-            // Удаляем файл обложки, если он есть
-            playlist.coverPath?.let { path ->
-                File(path).delete()
+        val playlist = playlistDao.getPlaylistById(playlistId) ?: return
+        playlistDao.delete(playlist)
+
+        // Удаляем треки, которые больше не используются
+        val trackIds = gson.fromJson<List<Long>>(playlist.trackIdsJson, object : TypeToken<List<Long>>() {}.type)
+        trackIds.forEach { trackId ->
+            if (!isTrackInAnyPlaylist(trackId)) {
+                tracksDao.deleteTrack(trackId)
             }
-            playlistDao.delete(playlist)
         }
     }
 
@@ -130,6 +134,57 @@ class PlaylistRepositoryImpl(
             playlistDao.update(updatedPlaylist.toEntity(gson))
         } catch (e: Exception) {
             throw PlaylistRepositoryException("Failed to add track to playlist", e)
+        }
+    }
+
+    override suspend fun getPlaylistWithTracks(playlistId: Long): Pair<Playlist, List<Track>>? {
+        val playlistEntity = playlistDao.getPlaylistById(playlistId) ?: return null
+        val playlist = playlistEntity.toDomain()
+
+        val trackEntities = tracksDao.getTracksByIds(playlist.trackIds)
+        val tracks = trackEntities.map { it.toTrack() }
+
+        return Pair(playlist, tracks)
+    }
+
+    private fun PlaylistTrackEntity.toTrack(): Track {
+        return Track(
+            trackId = trackId,
+            trackName = trackName,
+            artistName = artistName,
+            collectionName = collectionName,
+            releaseDate = releaseDate,
+            primaryGenreName = primaryGenreName,
+            country = country,
+            trackTimeMillis = trackTimeMillis,
+            previewUrl = previewUrl,
+            artworkUrl100 = artworkUrl100
+        )
+    }
+
+    override suspend fun removeTrackFromPlaylist(playlistId: Long, trackId: Long) {
+        val playlistEntity = playlistDao.getPlaylistById(playlistId) ?: return
+        val playlist = playlistEntity.toDomain()
+
+        val updatedTrackIds = playlist.trackIds.filter { it != trackId }
+        val updatedPlaylist = playlist.copy(
+            trackIds = updatedTrackIds,
+            tracksCount = updatedTrackIds.size
+        )
+
+        playlistDao.update(updatedPlaylist.toEntity(gson))
+
+        // Проверяем, есть ли этот трек в других плейлистах
+        if (!isTrackInAnyPlaylist(trackId)) {
+            tracksDao.deleteTrack(trackId)
+        }
+    }
+
+    private suspend fun isTrackInAnyPlaylist(trackId: Long): Boolean {
+        val allPlaylists = playlistDao.getAllPlaylists()
+        return allPlaylists.any { playlist ->
+            gson.fromJson<List<Long>>(playlist.trackIdsJson, object : TypeToken<List<Long>>() {}.type)
+                .contains(trackId)
         }
     }
 }

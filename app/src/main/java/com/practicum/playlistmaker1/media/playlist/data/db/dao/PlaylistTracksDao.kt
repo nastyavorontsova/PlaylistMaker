@@ -14,6 +14,12 @@ interface PlaylistTracksDao {
 
     @Query("SELECT * FROM playlist_tracks WHERE trackId = :trackId")
     suspend fun getTrackById(trackId: Long): PlaylistTrackEntity?
+
+    @Query("SELECT * FROM playlist_tracks WHERE trackId IN (:trackIds)")
+    suspend fun getTracksByIds(trackIds: List<Long>): List<PlaylistTrackEntity>
+
+    @Query("DELETE FROM playlist_tracks WHERE trackId = :trackId")
+    suspend fun deleteTrack(trackId: Long)
 }
 
 // метод расширения для конвертации
