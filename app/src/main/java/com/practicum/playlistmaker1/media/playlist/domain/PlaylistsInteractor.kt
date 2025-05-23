@@ -13,4 +13,16 @@ class PlaylistsInteractor(
     suspend fun addTrackToPlaylist(track: Track, playlist: Playlist) {
         repository.addTrackToPlaylist(track, playlist)
     }
+
+    suspend fun getPlaylistWithTracks(playlistId: Long): Pair<Playlist, List<Track>>? {
+        return repository.getPlaylistWithTracks(playlistId)
+    }
+
+    suspend fun removeTrackFromPlaylist(playlistId: Long, trackId: Long) {
+        repository.removeTrackFromPlaylist(playlistId, trackId)
+    }
+
+    suspend fun deletePlaylist(playlistId: Long) {
+        repository.deletePlaylist(playlistId)
+    }
 }

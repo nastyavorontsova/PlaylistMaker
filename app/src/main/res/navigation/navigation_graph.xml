@@ -14,10 +14,13 @@
             app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
     </action>
 
-
     <action
         android:id="@+id/action_global_playlistFragment"
         app:destination="@id/playlistFragment" />
+
+    <action
+        android:id="@+id/action_global_mediaLibraryFragment"
+        app:destination="@id/mediaLibraryFragment" />
 
     <!-- Основные фрагменты -->
     <fragment
@@ -51,6 +54,14 @@
             app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
     </action>
 
+    <action
+        android:id="@+id/action_mediaLibraryFragment_to_createdPlaylistFragment"
+        app:destination="@id/createdPlaylistFragment">
+        <argument
+            android:name="playlistId"
+            app:argType="long" />
+    </action>
+
     <fragment
         android:id="@+id/favoritesFragment"
         android:name="com.practicum.playlistmaker1.media.favorites.ui.FavoritesFragment"
@@ -78,6 +89,14 @@
         <action
             android:id="@+id/action_playlistsFragment_to_playlistFragment"
             app:destination="@id/playlistFragment" />
+        <action
+            android:id="@+id/action_playlistsFragment_to_createdPlaylistFragment"
+            app:destination="@id/createdPlaylistFragment">
+            <argument
+                android:name="playlistId"
+                app:argType="long" />
+        </action>
+
     </fragment>
 
     <!-- Фрагмент создания/редактирования плейлиста -->
@@ -101,4 +120,31 @@
             android:name="TRACK_DATA"
             app:argType="com.practicum.playlistmaker1.search.domain.models.Track" />
     </fragment>
+
+
+    <!-- Фрагмент деталей созданного плейлиста -->
+    <fragment
+        android:id="@+id/createdPlaylistFragment"
+        android:name="com.practicum.playlistmaker1.media.playlist.ui.CreatedPlaylistFragment"
+        android:label="CreatedPlaylistFragment" >
+
+    <action
+        android:id="@+id/action_createdPlaylistFragment_to_editPlaylistFragment"
+        app:destination="@id/editPlaylistFragment" >
+        <argument
+            android:name="playlistId"
+            android:defaultValue="-1L"
+            app:argType="long" />
+    </action>
+
+    </fragment>
+    <fragment
+        android:id="@+id/editPlaylistFragment"
+        android:name="com.practicum.playlistmaker1.media.playlist.ui.EditPlaylistFragment"
+        android:label="EditPlaylistFragment">
+        <argument
+            android:name="playlistId"
+            app:argType="long" />
+    </fragment>
+
 </navigation>

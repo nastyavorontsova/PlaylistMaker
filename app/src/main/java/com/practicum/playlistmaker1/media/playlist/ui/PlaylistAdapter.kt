@@ -14,8 +14,8 @@ import com.practicum.playlistmaker1.media.playlist.data.db.dao.Playlist
 import java.io.File
 
 class PlaylistAdapter(
-    private val onItemClick: (Playlist) -> Unit
-) : ListAdapter<Playlist, PlaylistAdapter.PlaylistViewHolder>(PlaylistDiffCallback()) {
+    private val onItemClick: (Long) -> Unit
+) : ListAdapter<Playlist, PlaylistAdapter.PlaylistViewHolder>(PlaylistDiffCallback()){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaylistViewHolder {
         val binding = ItemPlaylistBinding.inflate(
@@ -32,7 +32,7 @@ class PlaylistAdapter(
 
     class PlaylistViewHolder(
         private val binding: ItemPlaylistBinding,
-        private val onItemClick: (Playlist) -> Unit
+        private val onItemClick: (Long) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(playlist: Playlist) {
@@ -51,7 +51,9 @@ class PlaylistAdapter(
                 name.text = playlist.name
                 tracksCount.text = "${playlist.tracksCount} треков"
 
-                root.setOnClickListener { onItemClick(playlist) }
+                root.setOnClickListener {
+                    onItemClick(playlist.id)
+                }
             }
         }
 

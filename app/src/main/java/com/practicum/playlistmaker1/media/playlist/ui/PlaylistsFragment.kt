@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker1.media.playlist.ui
 
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -53,12 +54,17 @@ class PlaylistsFragment : Fragment() {
 
     private fun setupRecyclerView() {
         val spacing = 2.dpToPx()
-        adapter = PlaylistAdapter { /* обработка клика */ }
+        adapter = PlaylistAdapter { playlistId ->
+            findNavController().navigate(
+                R.id.action_mediaLibraryFragment_to_createdPlaylistFragment,
+                bundleOf("playlistId" to playlistId)
+            )
+        }
 
         binding.playlistsRecyclerView.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
             adapter = this@PlaylistsFragment.adapter
-            addItemDecoration(GridSpacingItemDecoration(2, 0, includeEdge = false))
+            addItemDecoration(GridSpacingItemDecoration(2, spacing, includeEdge = false))
         }
     }
 
