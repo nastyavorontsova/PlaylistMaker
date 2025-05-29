@@ -5,6 +5,7 @@ import com.practicum.playlistmaker1.media.favorites.data.db.AppDatabase
 import com.practicum.playlistmaker1.media.playlist.data.db.PlaylistRepositoryImpl
 import com.practicum.playlistmaker1.media.playlist.domain.PlaylistRepository
 import com.practicum.playlistmaker1.media.playlist.domain.PlaylistsInteractor
+import com.practicum.playlistmaker1.media.playlist.ui.EditPlaylistViewModel
 import com.practicum.playlistmaker1.media.playlist.ui.PlaylistViewModel
 import com.practicum.playlistmaker1.media.playlist.ui.PlaylistsViewModel
 import org.koin.android.ext.koin.androidContext
@@ -25,5 +26,11 @@ val playlistModule = module {
 
     factory { PlaylistsInteractor(get()) }
     viewModel { PlaylistsViewModel(get()) }
-    viewModel { PlaylistViewModel(get()) }
+    viewModel {
+        PlaylistViewModel(get(), get()) // get<Application>(), get<PlaylistRepository>()
+    }
+
+    viewModel {
+        EditPlaylistViewModel(get(), get()) // get<Application>(), get<PlaylistRepository>()
+    }
 }

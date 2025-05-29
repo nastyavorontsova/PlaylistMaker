@@ -1,6 +1,8 @@
 package com.practicum.playlistmaker1.media.playlist.ui
 
+import android.app.Application
 import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,11 +10,12 @@ import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker1.media.playlist.domain.PlaylistRepository
 import kotlinx.coroutines.launch
 
-class PlaylistViewModel(
-    private val playlistRepository: PlaylistRepository
-) : ViewModel() {
+open class PlaylistViewModel(
+    protected val playlistRepository: PlaylistRepository,
+    application: Application
+) : AndroidViewModel(application) {
 
-    private val _playlistCreated = MutableLiveData<Boolean>()
+    val _playlistCreated = MutableLiveData<Boolean>()
     val playlistCreated: LiveData<Boolean> = _playlistCreated
 
     private val _showExitDialog = MutableLiveData<Boolean>()

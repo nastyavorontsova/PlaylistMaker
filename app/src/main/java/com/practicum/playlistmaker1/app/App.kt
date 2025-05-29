@@ -7,6 +7,7 @@ import com.practicum.playlistmaker1.media.favorites.di.dataModule
 import com.practicum.playlistmaker1.media.favorites.di.interactorMediaModule
 import com.practicum.playlistmaker1.media.favorites.di.repositoryMediaModule
 import com.practicum.playlistmaker1.media.favorites.di.mediaModule
+import com.practicum.playlistmaker1.media.playlist.di.createdPlaylistModule
 import com.practicum.playlistmaker1.media.playlist.di.playlistModule
 import com.practicum.playlistmaker1.media.playlist.di.playlistViewModelModule
 import com.practicum.playlistmaker1.player.di.audioPlayerModule
@@ -52,7 +53,8 @@ class App : Application() {
                     repositoryMediaModule,
                     interactorMediaModule,
                     playlistModule,
-                    playlistViewModelModule
+                    playlistViewModelModule,
+                    createdPlaylistModule
                 )
             )
         }

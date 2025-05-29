@@ -29,12 +29,12 @@ import com.practicum.playlistmaker1.R
 import com.practicum.playlistmaker1.databinding.FragmentPlaylistBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class PlaylistFragment : Fragment() {
+open class PlaylistFragment : Fragment() {
 
-    private var _binding: FragmentPlaylistBinding? = null
-    private val binding get() = _binding!!
-    private val viewModel: PlaylistViewModel by viewModel()
-    private var selectedCoverUri: Uri? = null
+    protected var _binding: FragmentPlaylistBinding? = null
+    protected val binding get() = _binding!!
+    open val viewModel: PlaylistViewModel by viewModel()
+    var selectedCoverUri: Uri? = null
     private var hasUnsavedChanges = false
     private var isFragmentActive = true
 
@@ -63,7 +63,7 @@ class PlaylistFragment : Fragment() {
         observeViewModel()
     }
 
-    private fun loadDefaultCover() {
+    fun loadDefaultCover() {
         try {
             val inputStream = requireContext().assets.open("empty_cover.svg")
             val svg = SVG.getFromInputStream(inputStream)
@@ -97,10 +97,11 @@ class PlaylistFragment : Fragment() {
         }
     }
 
-    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+    val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         uri?.let {
             selectedCoverUri = uri
             binding.svgImageView.setImageURI(uri)
+            onMediaPicked(it)
             hasUnsavedChanges = true
         } ?: run {
             loadDefaultCover()
@@ -183,7 +184,7 @@ class PlaylistFragment : Fragment() {
         inputLayout.refreshDrawableState()
     }
 
-    private fun updateCreateButtonState(isEnabled: Boolean) {
+    fun updateCreateButtonState(isEnabled: Boolean) {
         binding.createButton.isEnabled = isEnabled
     }
 
@@ -223,7 +224,7 @@ class PlaylistFragment : Fragment() {
         }
     }
 
-    private fun checkForUnsavedChanges() {
+    open fun checkForUnsavedChanges() {
         if (hasUnsavedChanges) {
             viewModel.checkForUnsavedChanges(true)
         } else {
@@ -250,5 +251,9 @@ class PlaylistFragment : Fragment() {
         super.onDestroyView()
         isFragmentActive = false
         _binding = null
+    }
+
+    open fun onMediaPicked(uri: Uri) {
+        // Пусто
     }
 }
